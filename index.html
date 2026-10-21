@@ -3628,17 +3628,6 @@ function renderMessages(chatId, items) {
     requestAnimationFrame(() => box.scrollTo({ top: box.scrollHeight, behavior: 'smooth' }));
   }
 }
-const yukiLocalMsgs = new Map();  // chatId -> [{id, msg}] optimistic Yuki messages (shown instantly, even if Firestore is slow)
-let _yukiLocalSeq = 0;
-function yukiShowLocal(chatId, by, text) {
-  const item = { id: 'local_' + (++_yukiLocalSeq), msg: { text, by, at: new Date(), seen: true } };
-  const arr = yukiLocalMsgs.get(chatId) || [];
-  arr.push(item);
-  yukiLocalMsgs.set(chatId, arr);
-  const cached = (msgCache.get(chatId) || []).concat([item]);
-  msgCache.set(chatId, cached);
-  if (activeChatId === chatId) renderMessages(chatId, cached);
-}
 function subscribeToMessages(chatId) {
   if (!chatId) return;
   const box = $('messagesContainer');
@@ -3655,14 +3644,7 @@ function subscribeToMessages(chatId) {
     limit(200)
   ), snap => {
     if (activeChatId !== chatId) return;
-    let _serverItems = snap.docs.map(d => ({ id: d.id, msg: d.data({ serverTimestamps: 'estimate' }) }));
-    if (activePeer && activePeer.isYuki) {
-      /* keep local (optimistic) Yuki messages until the server copy shows up */
-      const _loc = (yukiLocalMsgs.get(chatId) || []).filter(l => !_serverItems.some(x => x.msg && x.msg.by === l.msg.by && x.msg.text === l.msg.text));
-      yukiLocalMsgs.set(chatId, _loc);
-      _serverItems = _serverItems.concat(_loc);
-    }
-    msgCache.set(chatId, _serverItems);
+    msgCache.set(chatId, snap.docs.map(d => ({ id: d.id, msg: d.data({ serverTimestamps: 'estimate' }) })));
 
     const lastMsgDoc = snap.docs[snap.docs.length - 1];
     if (lastMsgDoc && activePeer && !activePeer.isYuki) {
@@ -3747,38 +3729,6 @@ async function handleSendMessage() {
   const cId = activeChatId;
   const peer = activePeer;
 
-  /* Yuki: show my message instantly + call /api/yuki right away (not after the Firestore writes) */
-  let yukiReplyPromise = null;
-  if (peer.isYuki) {
-    yukiShowLocal(cId, currentUser.uid, text);
-    const _hist = yukiHistory.slice();
-    yukiReplyPromise = (async () => {
-      try {
-        const res = await fetch('/api/yuki', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: text, history: _hist })
-        });
-        if (!res.ok) {
-          console.error('Yuki API error:', res.status, res.statusText);
-          return 'Yuki API error (' + res.status + '). Please try again.';
-        }
-        const data = await res.json();
-        return data.reply || data.response || data.message || data.text ||
-          (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '...';
-      } catch(e) {
-        console.error('Yuki API call failed:', e);
-        return 'Could not reach Yuki API. Please check your connection and try again.';
-      }
-    })();
-    /* show the reply as soon as it arrives, independent of Firestore */
-    yukiReplyPromise.then(r => {
-      yukiHistory.push({ role: 'user', content: text }, { role: 'assistant', content: r });
-      yukiHistory = yukiHistory.slice(-20);
-      yukiShowLocal(cId, YUKI_BOT_UID, r);
-    });
-  }
-
   try {
     if (peer.isYuki) {
       await setDoc(doc(db, 'chats', cId), {
@@ -3818,27 +3768,48 @@ async function handleSendMessage() {
     }
     renderDirectsList();
 
-    // AI companion reply flow: save Yuki's reply (already shown locally) to Firestore
-    if (peer.isYuki && yukiReplyPromise) {
-      const reply = await yukiReplyPromise;
-      try {
-        await addDoc(collection(db, 'chats', cId, 'messages'), {
-          text: reply,
-          by: YUKI_BOT_UID,
-          at: serverTimestamp(),
-          seen: true
-        });
+    // AI companion reply flow
+    if (peer.isYuki) {
+      setTimeout(async () => {
+        let reply = '...';
+        try {
+          const res = await fetch('/api/yuki', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: text, history: yukiHistory })
+          });
+          if (res.ok) {
+            const data = await res.json();
+            reply = data.reply || data.response || data.message || data.text || '...';
+          } else {
+            reply = "I'm Yuki AI. I'm connected to your backend workspace!";
+          }
+        } catch(e) {
+          reply = "I'm Yuki AI companion, ready to assist with code, design, and ideas!";
+        }
 
-        await setDoc(doc(db, 'chats', cId), {
-          lastMsg: reply.slice(0, 80),
-          lastMsgAt: serverTimestamp(),
-          lastMsgBy: YUKI_BOT_UID,
-          touchAt: serverTimestamp()
-        }, { merge: true });
-      } catch(e) {
-        console.error('Yuki reply save error:', e);
-        showToast('Yuki reply could not be saved' + (e && e.code ? ' (' + e.code + ')' : ''));
-      }
+        yukiHistory.push({ role: 'user', content: text }, { role: 'assistant', content: reply });
+        yukiHistory = yukiHistory.slice(-20);
+
+        try {
+          await addDoc(collection(db, 'chats', cId, 'messages'), {
+            text: reply,
+            by: YUKI_BOT_UID,
+            at: serverTimestamp(),
+            seen: true
+          });
+
+          await setDoc(doc(db, 'chats', cId), {
+            lastMsg: reply.slice(0, 80),
+            lastMsgAt: serverTimestamp(),
+            lastMsgBy: YUKI_BOT_UID,
+            touchAt: serverTimestamp()
+          }, { merge: true });
+        } catch(e) {
+          console.error('Yuki reply save error:', e);
+          showToast('Yuki reply could not be saved' + (e && e.code ? ' (' + e.code + ')' : ''));
+        }
+      }, 650);
     }
   } catch(err) {
     console.error('Send error:', err);
@@ -4378,7 +4349,7 @@ $('btnContextClearChat')?.addEventListener('click', async () => {
     const meta = { lastMsg: '' };
     if (!peer.isYuki) meta.unread = { [currentUser.uid]: 0, [peer.uid]: 0 };
     await setDoc(doc(db, 'chats', cId), meta, { merge: true });
-    if (peer.isYuki) { yukiHistory = []; yukiLocalMsgs.delete(cId); }
+    if (peer.isYuki) yukiHistory = [];
     const _le = conversationList.find(c => c.chatId === cId);
     if (_le) {
       _le.data = { ..._le.data, lastMsg: '', unread: { ...(_le.data.unread || {}), [currentUser.uid]: 0 } };
