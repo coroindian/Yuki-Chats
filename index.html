@@ -2052,6 +2052,76 @@ body, .device-wrapper { height: var(--app-h, 100dvh); }
 .settings-drawer.chat-context .settings-row:last-child {
   border-bottom: 0;
 }
+
+/* ==========================================================================
+   BUG-FIX OVERRIDES: boxed settings, tighter gaps, lighter names
+   ========================================================================== */
+/* Menu settings: boxed, small gap between boxes */
+.settings-drawer.menu-context #drawerMainView > .settings-sec-label { margin: 12px 0 5px 4px; }
+.settings-drawer.menu-context #drawerMainView > .settings-sec-label:first-child { margin-top: 4px; }
+.settings-drawer.menu-context #drawerMainView > .settings-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  overflow: hidden;
+  margin: 0;
+}
+.settings-drawer.menu-context #drawerMainView .settings-row { padding: 10px 14px; min-height: 54px; }
+.settings-drawer.menu-context #drawerMainView .settings-icon {
+  background: var(--primary-blue-light);
+  color: var(--primary-blue);
+  width: 34px; height: 34px; border-radius: 10px;
+}
+.settings-drawer.menu-context #drawerMainView .settings-icon.danger { background: rgba(239, 68, 68, 0.12); color: #ef4444; }
+.settings-drawer.menu-context #drawerMainView .settings-icon svg { width: 18px; height: 18px; }
+
+/* Chat settings: each action is its own box with a slight gap */
+.settings-drawer.chat-context #chatContextActions > .settings-sec-label { margin: 4px 0 8px 4px; }
+.settings-drawer.chat-context #chatContextActions .settings-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: transparent;
+  border: 0;
+  overflow: visible;
+}
+.settings-drawer.chat-context #chatContextActions .settings-row,
+.settings-drawer.chat-context #chatContextActions .settings-card > .settings-row:not(:last-child) {
+  background: var(--card-bg);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 10px 14px;
+  min-height: 54px;
+}
+.settings-drawer.chat-context #chatContextActions .settings-icon {
+  background: var(--primary-blue-light);
+  color: var(--primary-blue);
+  width: 34px; height: 34px; border-radius: 10px;
+}
+.settings-drawer.chat-context #chatContextActions .settings-icon.danger { background: rgba(239, 68, 68, 0.12); color: #ef4444; }
+.settings-drawer.chat-context #chatContextActions .settings-icon svg { width: 18px; height: 18px; }
+
+/* Names: lighter, more natural weight */
+.chat-card-name { font-weight: 500; letter-spacing: 0; }
+.chat-header-meta b { font-weight: 500; letter-spacing: 0; }
+#modalContactName { font-weight: 500 !important; }
+#blockedUsersContainer b { font-weight: 500 !important; }
+
+/* Settings boxes: every row/box exactly the same size (menu + chat settings) */
+.settings-drawer.menu-context #drawerMainView .settings-row,
+.settings-drawer.chat-context #chatContextActions .settings-row,
+.settings-drawer.chat-context #chatContextActions .settings-card > .settings-row:not(:last-child) {
+  height: 64px; min-height: 64px; max-height: 64px;
+  box-sizing: border-box; padding-top: 0; padding-bottom: 0;
+}
+.settings-drawer.menu-context #drawerMainView .settings-info,
+.settings-drawer.chat-context #chatContextActions .settings-info { overflow: hidden; }
+.settings-drawer.menu-context #drawerMainView .settings-sub-title,
+.settings-drawer.chat-context #chatContextActions .settings-sub-title,
+.settings-drawer.menu-context #drawerMainView .settings-main-title,
+.settings-drawer.chat-context #chatContextActions .settings-main-title {
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 </style>
 </head>
 <body>
@@ -2497,7 +2567,11 @@ body, .device-wrapper { height: var(--app-h, 100dvh); }
     if (!(h > 0)) return;
     if (h !== lastH) {
       lastH = h;
-      root.style.setProperty('--app-h', h + 'px');
+      /* The dedicated keyboard animation below owns live viewport-height updates.
+         This synchronizer only initializes the height, avoiding competing writes. */
+      if (!window.__chatKeyboardAnimationOwnsHeight) {
+        root.style.setProperty('--app-h', h + 'px');
+      }
     }
     lastW = w;
   }
@@ -3319,7 +3393,22 @@ function openChatView(peerUid, profile = null) {
   $('searchBoxWrap')?.classList.remove('has-value');
   $('searchResultsView').classList.remove('active');
 
-  subscribeToMessages(activeChatId);
+  if (activePeer.isYuki && currentUser) {
+    const _yid = activeChatId;
+    scaffoldMessages(_yid);
+    const _yc = msgCache.get(_yid);
+    if (_yc) renderMessages(_yid, _yc);
+    setDoc(doc(db, 'chats', _yid), {
+      users: [currentUser.uid, peerUid],
+      [`participants.${currentUser.uid}`]: true,
+      [`participants.${peerUid}`]: true,
+      touchAt: serverTimestamp()
+    }, { merge: true }).catch(e => console.warn('Yuki chat init:', e)).then(() => {
+      if (activeChatId === _yid && !unsubscribeMessages) subscribeToMessages(_yid);
+    });
+  } else {
+    subscribeToMessages(activeChatId);
+  }
   if (!activePeer.isYuki) watchProfile(peerUid);
 
   // Mark unread as seen
@@ -3641,6 +3730,15 @@ async function handleSendMessage() {
   const peer = activePeer;
 
   try {
+    if (peer.isYuki) {
+      await setDoc(doc(db, 'chats', cId), {
+        users: [currentUser.uid, peer.uid],
+        [`participants.${currentUser.uid}`]: true,
+        [`participants.${peer.uid}`]: true,
+        touchAt: serverTimestamp()
+      }, { merge: true });
+      if (activeChatId === cId && !unsubscribeMessages) subscribeToMessages(cId);
+    }
     await addDoc(collection(db, 'chats', cId, 'messages'), {
       text,
       by: currentUser.uid,
@@ -3693,24 +3791,29 @@ async function handleSendMessage() {
         yukiHistory.push({ role: 'user', content: text }, { role: 'assistant', content: reply });
         yukiHistory = yukiHistory.slice(-20);
 
-        await addDoc(collection(db, 'chats', cId, 'messages'), {
-          text: reply,
-          by: YUKI_BOT_UID,
-          at: serverTimestamp(),
-          seen: true
-        });
+        try {
+          await addDoc(collection(db, 'chats', cId, 'messages'), {
+            text: reply,
+            by: YUKI_BOT_UID,
+            at: serverTimestamp(),
+            seen: true
+          });
 
-        await setDoc(doc(db, 'chats', cId), {
-          lastMsg: reply.slice(0, 80),
-          lastMsgAt: serverTimestamp(),
-          lastMsgBy: YUKI_BOT_UID,
-          touchAt: serverTimestamp()
-        }, { merge: true });
+          await setDoc(doc(db, 'chats', cId), {
+            lastMsg: reply.slice(0, 80),
+            lastMsgAt: serverTimestamp(),
+            lastMsgBy: YUKI_BOT_UID,
+            touchAt: serverTimestamp()
+          }, { merge: true });
+        } catch(e) {
+          console.error('Yuki reply save error:', e);
+          showToast('Yuki reply could not be saved' + (e && e.code ? ' (' + e.code + ')' : ''));
+        }
       }, 650);
     }
   } catch(err) {
     console.error('Send error:', err);
-    showToast('Failed to send message');
+    showToast('Failed to send message' + (err && err.code ? ' (' + err.code + ')' : ''));
   }
 }
 
@@ -4062,21 +4165,75 @@ $('btnChatBack')?.addEventListener('click', () => {
 
 $('btnOpenYukiRoom')?.addEventListener('click', openYukiBotChat);
 
-/* Keyboard open/close: keep the same messages visible instead of hiding them below the keyboard */
+/* Keyboard open/close: the layout jumps to its final size at once (composer stays glued to the keyboard),
+   the message list glides with one smooth spring. Same messages stay visible; if you were at the
+   bottom you stay at the bottom. */
 (function(){
   const box = $('messagesContainer');
   if (!box || !window.ResizeObserver) return;
-  let prevH = box.clientHeight;
-  let lastTop = box.scrollTop;
-  box.addEventListener('scroll', () => { lastTop = box.scrollTop; }, { passive: true });
+  const OMEGA = 24;
+  let prevH = box.clientHeight, lastTop = box.scrollTop, stuck = true;
+  let anim = false, raf = 0, last = 0, cur = 0, tgt = 0, vel = 0, basePad = 0, extra = 0;
+  const dock = document.querySelector('.composer-dock');
+  let cx = 0, cvel = 0;                       // composer offset (px) + velocity, glides to 0 with the same spring
+  const isStuck = () => (box.scrollHeight - extra - box.scrollTop - box.clientHeight) < 90;
+
+  function endAnim(toTarget){
+    if (raf) cancelAnimationFrame(raf);
+    raf = 0; last = 0; vel = 0; cx = 0; cvel = 0;
+    if (dock) dock.style.transform = '';
+    const keep = toTarget ? tgt : box.scrollTop;
+    anim = false; extra = 0;
+    box.style.paddingBottom = '';
+    box.scrollTop = keep;
+    lastTop = box.scrollTop;
+    stuck = isStuck();
+  }
+  function step(now){
+    raf = 0;
+    let dt = last ? Math.min(0.05, (now - last) / 1000) : 0.016;
+    if (!(dt > 0)) dt = 0.016;
+    last = now;
+    const x = cur - tgt, B = vel + OMEGA * x, e = Math.exp(-OMEGA * dt);
+    const nx = (x + B * dt) * e;
+    vel = (vel - OMEGA * B * dt) * e;
+    cur = tgt + nx;
+    const cB = cvel + OMEGA * cx;
+    cx = (cx + cB * dt) * e;
+    cvel = (cvel - OMEGA * cB * dt) * e;
+    if (Math.abs(nx) < 0.4 && Math.abs(vel) < 10 && Math.abs(cx) < 0.4 && Math.abs(cvel) < 10) { endAnim(true); return; }
+    box.scrollTop = cur;
+    if (dock) dock.style.transform = 'translate3d(0,' + cx.toFixed(2) + 'px,0)';
+    raf = requestAnimationFrame(step);
+  }
+
+  box.addEventListener('scroll', () => {
+    if (anim) return;
+    lastTop = box.scrollTop;
+    stuck = isStuck();
+  }, { passive: true });
+  box.addEventListener('touchstart', () => { if (anim) endAnim(false); }, { passive: true });
+  box.addEventListener('wheel', () => { if (anim) endAnim(false); }, { passive: true });
+
   new ResizeObserver(() => {
     const h = box.clientHeight;
-    const d = prevH - h;          // + when keyboard opens, - when it closes
+    const old = prevH;
     prevH = h;
-    if (d !== 0) {
-      box.scrollTop = lastTop + d;
-      lastTop = box.scrollTop;
-    }
+    if (!old || !h || old === h) return;
+    const d = old - h;                       // + keyboard opening, - closing
+    const start = anim ? cur : lastTop;
+    const max = Math.max(0, box.scrollHeight - extra - h);
+    tgt = stuck ? max : Math.max(0, Math.min(max, start + d));
+    if (!anim) basePad = parseFloat(getComputedStyle(box).paddingBottom) || 0;
+    extra = Math.max(0, start - max);        // keeps the old scroll position valid while the list grows
+    box.style.paddingBottom = (basePad + extra) + 'px';
+    box.scrollTop = start;
+    cur = box.scrollTop;
+    cx += d;                                  // composer starts at its old spot, then rises/falls with the list
+    if (dock) dock.style.transform = 'translate3d(0,' + cx.toFixed(2) + 'px,0)';
+    if (Math.abs(cur - tgt) < 1) { cur = tgt; vel = 0; }
+    anim = true;
+    if (!raf) { last = 0; raf = requestAnimationFrame(step); }
   }).observe(box);
 })();
 
@@ -4292,10 +4449,32 @@ $('btnContextDeleteChat')?.addEventListener('click', () => {
       document.body.appendChild(b); }
     b.textContent=(window.__chatBooted?'App error:\n':'App did not start:\n')+errs.join('\n')+'\n\n(Screenshot this box and send it)';
   }
-  window.addEventListener('error',function(e){ if(!e.message) return; errs.push(e.message+(e.filename?' @'+String(e.filename).split('/').pop()+':'+e.lineno:'')); setTimeout(function(){show(true)},300); },true);
+  window.addEventListener('error',function(e){ if(!e.message) return; if(/ResizeObserver loop/i.test(e.message)){ e.stopImmediatePropagation(); e.preventDefault(); return; } errs.push(e.message+(e.filename?' @'+String(e.filename).split('/').pop()+':'+e.lineno:'')); setTimeout(function(){show(true)},300); },true);
   window.addEventListener('unhandledrejection',function(e){ errs.push('promise: '+((e.reason&&e.reason.message)||e.reason)); setTimeout(function(){show(true)},300); });
   window.addEventListener('fbloadfail',function(){ errs.push('Firebase failed to load: '+window.__fbLoadError+'\nCheck internet / VPN / ad-blocker blocking gstatic.com'); show(true); });
   setTimeout(function(){ if(!window.__chatBooted){ if(!errs.length) errs.push('no error captured - Firebase still loading (slow/blocked network?)'); show(); } },7000);
+})();
+</script>
+<style id="kbAnimSupport">
+/* Behaviour-only (no visual change): stop the browser's scroll anchoring from fighting the keyboard scroll sync */
+.messages-container { overflow-anchor: none; }
+</style>
+<script>
+/* Keyboard: follow the real visual viewport directly (no extra animation layer),
+   so the composer always stays attached to the top of the keyboard. */
+(function(){
+  var vv = window.visualViewport;
+  var root = document.documentElement;
+  if (!vv) return;
+  function sync(){
+    var h = Math.round(vv.height);
+    if (h > 0) root.style.setProperty('--app-h', h + 'px');
+    document.body.style.top = vv.offsetTop ? Math.round(vv.offsetTop) + 'px' : '';
+  }
+  vv.addEventListener('resize', sync, { passive: true });
+  vv.addEventListener('scroll', sync, { passive: true });
+  window.addEventListener('orientationchange', function(){ setTimeout(sync, 150); }, { passive: true });
+  sync();
 })();
 </script>
 </body>
