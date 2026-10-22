@@ -715,6 +715,13 @@ svg { width: 1.15em; height: 1.15em; fill: none; stroke: currentColor; stroke-wi
 }
 .chat-message-row.is-mine .msg-bubble { align-self: flex-end; }
 
+/* Yuki AI error messages */
+.chat-message-row.is-error .msg-bubble {
+  color: var(--accent-red);
+  border-color: rgba(244, 63, 94, 0.28);
+  background: color-mix(in srgb, var(--accent-red) 7%, var(--bubble-incoming));
+}
+
 /* Smooth message animations (only for NEW messages) */
 .chat-message-row { contain: layout style paint; will-change: transform, opacity; }
 .chat-message-row:not(.is-mine) {
@@ -2122,6 +2129,227 @@ body, .device-wrapper { height: var(--app-h, 100dvh); }
 .settings-drawer.chat-context #chatContextActions .settings-main-title {
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+
+/* ==========================================================================
+   SETTINGS = POPUP MENU (menu + chat settings)
+   Sirf icon + naam. Icon ka box nahi. Text/icon: light = black, dark = white.
+   Sirf CSS; koi JS/function change nahi.
+   ========================================================================== */
+#settingsDrawer {
+  --pm-fg: #000000;
+  --pm-bg: #ffffff;
+  --pm-press: rgba(0, 0, 0, 0.07);
+  top: 62px;
+  bottom: auto;
+  right: 12px;
+  left: auto;
+  width: 292px;
+  max-width: calc(100% - 24px);
+  height: auto;
+  max-height: calc(100% - 80px);
+  background: var(--pm-bg);
+  border: 1px solid var(--border-subtle);
+  border-radius: 18px;
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.22);
+  overflow: hidden;
+  transform-origin: top right;
+  transform: scale(0.9) translateY(-6px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.16s ease, visibility 0s linear 0.2s;
+}
+:root[data-theme="dark"] #settingsDrawer {
+  --pm-fg: #ffffff;
+  --pm-bg: #212121;
+  --pm-press: rgba(255, 255, 255, 0.1);
+}
+#settingsDrawer.active {
+  transform: none;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.16s ease, visibility 0s;
+}
+/* Profile / Block list sub-view: thoda chauda popup, header (back) dikhega */
+#settingsDrawer:has(#drawerMainView.hidden) { width: 360px; }
+/* Main popup me header nahi (YouTube menu jaisa); scrim pe tap se band hota hai */
+#settingsDrawer:has(#drawerMainView:not(.hidden)) > .drawer-header { display: none; }
+#settingsDrawer > .drawer-body { padding: 8px 0; }
+#settingsDrawer:has(#drawerMainView.hidden) > .drawer-body { padding: 8px 16px 20px; }
+
+/* labels, cards, boxes hatao */
+#settingsDrawer #drawerMainView .settings-sec-label { display: none !important; }
+#settingsDrawer #drawerMainView .settings-card,
+#settingsDrawer #drawerMainView #chatContextActions .settings-card {
+  display: block;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  overflow: visible;
+}
+/* har row: icon + naam */
+#settingsDrawer #drawerMainView .settings-row,
+#settingsDrawer #drawerMainView #chatContextActions .settings-card > .settings-row:not(:last-child) {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 18px;
+  height: 52px; min-height: 52px; max-height: 52px;
+  padding: 0 22px;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-sizing: border-box;
+  opacity: 1;
+}
+#settingsDrawer #drawerMainView .settings-row:active { background: var(--pm-press) !important; transform: none; opacity: 1; }
+@media (hover: hover) and (pointer: fine) {
+  #settingsDrawer #drawerMainView .settings-row:hover { background: var(--pm-press) !important; opacity: 1; }
+}
+/* icon: no box, no tint */
+#settingsDrawer #drawerMainView .settings-icon,
+#settingsDrawer #drawerMainView .settings-icon.danger {
+  background: transparent !important;
+  color: var(--pm-fg) !important;
+  width: 24px; height: 24px;
+  border-radius: 0;
+  display: grid; place-items: center;
+  flex: none;
+}
+#settingsDrawer #drawerMainView .settings-icon svg {
+  width: 24px; height: 24px;
+  stroke: var(--pm-fg) !important;
+  stroke-width: 1.7;
+}
+/* naam: sab ka same colour (Block / Delete bhi) */
+#settingsDrawer #drawerMainView .settings-info { flex: 1; min-width: 0; overflow: hidden; }
+#settingsDrawer #drawerMainView .settings-main-title {
+  color: var(--pm-fg) !important;
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+#settingsDrawer #drawerMainView .settings-sub-title { display: none !important; }
+#settingsDrawer #drawerMainView .settings-chevron { display: none !important; }
+#settingsDrawer #drawerMainView .toggle-switch { margin-left: auto; flex: none; }
+
+/* purani stagger animation band, popup apne aap scale-in hota hai */
+#settingsDrawer.active #drawerMainView:not(.hidden) > *,
+#settingsDrawer.active #drawerMainView:not(.hidden) > #chatContextActions { animation: none !important; }
+
+/* ==========================================================================
+   SETTINGS POPUP: website blue theme, smaller size, new preference rows
+   (sirf settings; baaki UI/animation untouched)
+   ========================================================================== */
+#settingsDrawer {
+  --pm-fg: var(--text-main);
+  --pm-bg: var(--card-bg);
+  --pm-press: var(--primary-blue-light);
+  top: 60px;
+  right: 10px;
+  width: 232px;
+  max-width: calc(100% - 20px);
+  max-height: calc(100% - 76px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.16);
+}
+:root[data-theme="dark"] #settingsDrawer {
+  --pm-fg: var(--text-main);
+  --pm-bg: var(--card-bg);
+  --pm-press: var(--card-hover);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+}
+#settingsDrawer:has(#drawerMainView.hidden) { width: 316px; }
+#settingsDrawer > .drawer-body { padding: 6px 0; }
+#settingsDrawer:has(#drawerMainView.hidden) > .drawer-body { padding: 6px 14px 16px; }
+#settingsDrawer #drawerMainView .settings-row,
+#settingsDrawer #drawerMainView #chatContextActions .settings-card > .settings-row:not(:last-child) {
+  gap: 12px;
+  height: 42px; min-height: 42px; max-height: 42px;
+  padding: 0 14px;
+}
+#settingsDrawer #drawerMainView .settings-icon,
+#settingsDrawer #drawerMainView .settings-icon.danger {
+  background: transparent !important;
+  color: var(--primary-blue) !important;
+  width: 22px; height: 22px;
+  border-radius: 0;
+}
+#settingsDrawer #drawerMainView .settings-icon svg {
+  width: 21px; height: 21px;
+  stroke: var(--primary-blue) !important;
+  stroke-width: 1.7;
+}
+#settingsDrawer #drawerMainView .settings-main-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-main) !important;
+}
+#settingsDrawer #drawerMainView .settings-row:active { background: var(--primary-blue-light) !important; }
+:root[data-theme="dark"] #settingsDrawer #drawerMainView .settings-row:active { background: var(--card-hover) !important; }
+@media (hover: hover) and (pointer: fine) {
+  #settingsDrawer #drawerMainView .settings-row:hover { background: var(--primary-blue-light) !important; }
+  :root[data-theme="dark"] #settingsDrawer #drawerMainView .settings-row:hover { background: var(--card-hover) !important; }
+}
+#settingsDrawer #drawerMainView .settings-sec-label { display: none !important; }
+#settingsDrawer .toggle-switch { width: 34px; height: 20px; border-radius: 10px; }
+#settingsDrawer .toggle-switch:after { top: 3px; left: 3px; width: 14px; height: 14px; }
+#settingsDrawer .toggle-switch.on:after { transform: translateX(14px); }
+#settingsDrawer .pm-value {
+  margin-left: auto; flex: none;
+  font-size: 12px; font-weight: 500;
+  color: var(--primary-blue);
+}
+#settingsDrawer .drawer-header { height: 52px; padding: 0 14px; }
+#settingsDrawer .drawer-title { font-size: 16px; }
+
+/* Chat settings closing: popup apni chat wali list hi dikhaye (home list nahi) */
+#settingsDrawer[data-ctx="chat"]:not(.chat-context):not(.menu-context) #drawerMainView > :not(#chatContextActions) { display: none !important; }
+#settingsDrawer[data-ctx="chat"]:not(.chat-context):not(.menu-context) #chatContextActions { display: block !important; }
+
+/* ---- preference effects ---- */
+:root[data-p-grey="1"] { filter: grayscale(1); }
+:root[data-p-fs="0"] .msg-bubble { font-size: 13px; }
+:root[data-p-fs="2"] .msg-bubble { font-size: 16.5px; }
+:root[data-p-fs="0"] .chat-card-name { font-size: 14px; }
+:root[data-p-fs="0"] .chat-card-preview { font-size: 12.5px; }
+:root[data-p-fs="2"] .chat-card-name { font-size: 16.5px; }
+:root[data-p-fs="2"] .chat-card-preview { font-size: 14.5px; }
+
+:root[data-p-accent="1"] { --primary-blue:#2f54eb; --primary-blue-hover:#2142c4; --primary-blue-light:#e8edff; --border-focus:#a5b4fc; --nav-active:#2f54eb; --bubble-outgoing:#2f54eb;
+  --glow-blue: 0 1px 3px rgba(47,84,235,.12), 0 6px 18px -6px rgba(47,84,235,.22), 0 12px 28px -12px rgba(47,84,235,.14); }
+:root[data-p-accent="2"] { --primary-blue:#0ea5e9; --primary-blue-hover:#0284c7; --primary-blue-light:#e0f4fe; --border-focus:#7dd3fc; --nav-active:#0ea5e9; --bubble-outgoing:#0ea5e9;
+  --glow-blue: 0 1px 3px rgba(14,165,233,.12), 0 6px 18px -6px rgba(14,165,233,.22), 0 12px 28px -12px rgba(14,165,233,.14); }
+:root[data-p-accent="3"] { --primary-blue:#4f46e5; --primary-blue-hover:#4338ca; --primary-blue-light:#ebe9ff; --border-focus:#a5b4fc; --nav-active:#4f46e5; --bubble-outgoing:#4f46e5;
+  --glow-blue: 0 1px 3px rgba(79,70,229,.12), 0 6px 18px -6px rgba(79,70,229,.22), 0 12px 28px -12px rgba(79,70,229,.14); }
+:root[data-theme="dark"][data-p-accent="1"] { --primary-blue:#3b5bdb; --primary-blue-hover:#2f4bc0; --primary-blue-light:#1e2442; --border-focus:#4f6df5; --nav-active:#6b86ff; --bubble-outgoing:#3b5bdb; }
+:root[data-theme="dark"][data-p-accent="2"] { --primary-blue:#0284c7; --primary-blue-hover:#0369a1; --primary-blue-light:#12283a; --border-focus:#0ea5e9; --nav-active:#38bdf8; --bubble-outgoing:#0284c7; }
+:root[data-theme="dark"][data-p-accent="3"] { --primary-blue:#4f46e5; --primary-blue-hover:#4338ca; --primary-blue-light:#1f1f45; --border-focus:#6366f1; --nav-active:#818cf8; --bubble-outgoing:#4f46e5; }
+
+:root[data-p-rm="1"] *, :root[data-p-rm="1"] *::before, :root[data-p-rm="1"] *::after {
+  animation-duration: 0.01ms !important; animation-delay: 0s !important;
+  transition-duration: 0.01ms !important; transition-delay: 0s !important;
+}
+:root[data-p-hc="1"] { --text-main:#0b1220; --text-muted:#334155; --border-subtle:#b6c2d4; }
+:root[data-theme="dark"][data-p-hc="1"] { --text-main:#ffffff; --text-muted:#cbd5e1; --border-subtle:#3b4b69; }
+
+:root[data-p-cl="1"] .chat-card { padding: 8px 16px; }
+:root[data-p-cl="1"] .chat-card .chat-card-avatar { width: 36px; height: 36px; font-size: 14px; }
+:root[data-p-cl="1"] .chat-card::after { left: 64px; }
+
+:root[data-p-wall="1"] .messages-container { background: linear-gradient(180deg, #dcebff 0%, #f1f6ff 100%); }
+:root[data-p-wall="2"] .messages-container { background-color: #eef3fa; background-image: radial-gradient(rgba(29,114,254,.14) 1.2px, transparent 1.4px); background-size: 18px 18px; }
+:root[data-p-wall="3"] .messages-container { background: linear-gradient(180deg, #0e1a33 0%, #0a1426 100%); }
+:root[data-theme="dark"][data-p-wall="1"] .messages-container { background: linear-gradient(180deg, #14233f 0%, #0d1626 100%); }
+:root[data-theme="dark"][data-p-wall="2"] .messages-container { background-color: #0d131f; background-image: radial-gradient(rgba(96,165,250,.16) 1.2px, transparent 1.4px); background-size: 18px 18px; }
+:root[data-p-wall="3"] .msg-sender-name { color: #94a3b8; }
+:root[data-p-ts="0"] .msg-time { display: none; }
+:root[data-p-mav="0"] .messages-container .msg-avatar { display: none; }
+:root[data-p-cb="1"] .msg-bubble { padding: 7px 11px; line-height: 1.32; }
 </style>
 </head>
 <body>
@@ -2366,6 +2594,50 @@ body, .device-wrapper { height: var(--app-h, 100dvh); }
           </div>
         </div>
 
+        <div class="settings-sec-label">Preferences</div>
+        <div class="settings-card" id="homePrefsCard">
+            <div class="settings-row pm-pref" id="rowPrefTextSize" data-pref="fs" data-type="cycle" data-n="3">
+              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg></span>
+              <div class="settings-info"><span class="settings-main-title">Text Size</span></div>
+              <span class="pm-value" data-val></span>
+            </div>
+            <div class="settings-row pm-pref" id="rowPrefAccent" data-pref="accent" data-type="cycle" data-n="4">
+              <span class="settings-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z"/></svg></span>
+              <div class="settings-info"><span class="settings-main-title">Accent Colour</span></div>
+              <span class="pm-value" data-val></span>
+            </div>
+            <div class="settings-row pm-pref" id="rowPrefReduceMotion" data-pref="rm" data-type="toggle">
+              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>
+              <div class="settings-info"><span class="settings-main-title">Reduce Motion</span></div>
+              <div class="toggle-switch" data-sw></div>
+            </div>
+            <div class="settings-row pm-pref" id="rowPrefContrast" data-pref="hc" data-type="toggle">
+              <span class="settings-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/></svg></span>
+              <div class="settings-info"><span class="settings-main-title">High Contrast</span></div>
+              <div class="toggle-switch" data-sw></div>
+            </div>
+            <div class="settings-row pm-pref" id="rowPrefCompactList" data-pref="cl" data-type="toggle">
+              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></span>
+              <div class="settings-info"><span class="settings-main-title">Compact Chat List</span></div>
+              <div class="toggle-switch" data-sw></div>
+            </div>
+            <div class="settings-row pm-pref" id="rowPrefHaptics" data-pref="hp" data-type="toggle">
+              <span class="settings-icon"><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></span>
+              <div class="settings-info"><span class="settings-main-title">Vibration Feedback</span></div>
+              <div class="toggle-switch" data-sw></div>
+            </div>
+            <div class="settings-row pm-pref" id="rowPrefGrey" data-pref="grey" data-type="toggle">
+              <span class="settings-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg></span>
+              <div class="settings-info"><span class="settings-main-title">Grey Mode</span></div>
+              <div class="toggle-switch" data-sw></div>
+            </div>
+            <div class="settings-row pm-pref" id="rowPrefReset" data-pref="reset" data-type="action">
+              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></span>
+              <div class="settings-info"><span class="settings-main-title">Reset Preferences</span></div>
+              
+            </div>
+        </div>
+
         <div class="settings-sec-label">Danger Zone</div>
         <div class="settings-card">
           <div class="settings-row" id="rowDeleteAccount">
@@ -2389,6 +2661,26 @@ body, .device-wrapper { height: var(--app-h, 100dvh); }
                 <span class="settings-sub-title">Toggle between Light & Dark themes</span>
               </div>
               <div class="toggle-switch" id="switchContextTheme"></div>
+            </div>
+            <div class="settings-row pm-pref" id="rowChatWallpaper" data-pref="wall" data-type="cycle" data-n="4">
+              <span class="settings-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></span>
+              <div class="settings-info"><span class="settings-main-title">Chat Wallpaper</span></div>
+              <span class="pm-value" data-val></span>
+            </div>
+            <div class="settings-row pm-pref" id="rowChatTimestamps" data-pref="ts" data-type="toggle">
+              <span class="settings-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+              <div class="settings-info"><span class="settings-main-title">Message Time</span></div>
+              <div class="toggle-switch" data-sw></div>
+            </div>
+            <div class="settings-row pm-pref" id="rowChatAvatars" data-pref="mav" data-type="toggle">
+              <span class="settings-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>
+              <div class="settings-info"><span class="settings-main-title">Message Avatars</span></div>
+              <div class="toggle-switch" data-sw></div>
+            </div>
+            <div class="settings-row pm-pref" id="rowChatCompact" data-pref="cb" data-type="toggle">
+              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 10h8"/></svg></span>
+              <div class="settings-info"><span class="settings-main-title">Compact Bubbles</span></div>
+              <div class="toggle-switch" data-sw></div>
             </div>
             <div class="settings-row" id="btnContextBlock">
               <span class="settings-icon danger"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg></span>
@@ -3522,11 +3814,12 @@ function makeDateDivider(ts) {
 
 function buildMessageRow(id, msg, animate) {
   const isMine = msg.by === currentUser?.uid;
+  const isError = !!msg.isError;
   const senderName = isMine ? (currentProfile?.display || 'You') : (activePeer?.display || 'Operator');
   const timeStr = formatClock(msg.at);
 
   const row = document.createElement('div');
-  row.className = 'chat-message-row' + (isMine ? ' is-mine' : '') + (animate ? '' : ' no-anim');
+  row.className = 'chat-message-row' + (isMine ? ' is-mine' : '') + (isError ? ' is-error' : '') + (animate ? '' : ' no-anim');
   row.dataset.id = id;
   row.innerHTML = `
     <div class="msg-bubble-wrap">
@@ -3739,12 +4032,27 @@ async function handleSendMessage() {
       }, { merge: true });
       if (activeChatId === cId && !unsubscribeMessages) subscribeToMessages(cId);
     }
-    await addDoc(collection(db, 'chats', cId, 'messages'), {
+    const sentMessageRef = await addDoc(collection(db, 'chats', cId, 'messages'), {
       text,
       by: currentUser.uid,
       at: serverTimestamp(),
       seen: false
     });
+
+    // Render the just-sent Yuki message immediately; Firestore realtime will reconcile it.
+    if (peer.isYuki && activeChatId === cId) {
+      const localItems = msgCache.get(cId) || [];
+      if (!localItems.some(item => item.id === sentMessageRef.id)) {
+        localItems.push({ id: sentMessageRef.id, msg: { text, by: currentUser.uid, at: new Date(), seen: false } });
+        localItems.sort((a, b) => {
+          const at = toDate(a.msg.at)?.getTime() || 0;
+          const bt = toDate(b.msg.at)?.getTime() || 0;
+          return at - bt;
+        });
+        msgCache.set(cId, localItems);
+        renderMessages(cId, localItems);
+      }
+    }
 
     await setDoc(doc(db, 'chats', cId), {
       users: [currentUser.uid, peer.uid],
@@ -3771,43 +4079,69 @@ async function handleSendMessage() {
     // AI companion reply flow
     if (peer.isYuki) {
       setTimeout(async () => {
-        let reply = '...';
+        let reply = '';
+        let replyError = '';
         try {
           const res = await fetch('/api/yuki', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ message: text, history: yukiHistory })
           });
-          if (res.ok) {
-            const data = await res.json();
-            reply = data.reply || data.response || data.message || data.text || '...';
-          } else {
-            reply = "I'm Yuki AI. I'm connected to your backend workspace!";
+          if (!res.ok) {
+            throw new Error(`Yuki API request failed (${res.status})`);
           }
+          const data = await res.json();
+          reply = data.reply || data.response || data.message || data.text || '';
+          if (!reply) throw new Error('Yuki API returned an empty response.');
         } catch(e) {
-          reply = "I'm Yuki AI companion, ready to assist with code, design, and ideas!";
+          console.error('Yuki API error:', e);
+          replyError = 'Yuki AI could not reply right now. Please try again.';
         }
 
-        yukiHistory.push({ role: 'user', content: text }, { role: 'assistant', content: reply });
-        yukiHistory = yukiHistory.slice(-20);
+        if (reply) {
+          yukiHistory.push({ role: 'user', content: text }, { role: 'assistant', content: reply });
+          yukiHistory = yukiHistory.slice(-20);
 
-        try {
-          await addDoc(collection(db, 'chats', cId, 'messages'), {
-            text: reply,
-            by: YUKI_BOT_UID,
-            at: serverTimestamp(),
-            seen: true
-          });
+          try {
+            const replyRef = await addDoc(collection(db, 'chats', cId, 'messages'), {
+              text: reply,
+              by: YUKI_BOT_UID,
+              at: serverTimestamp(),
+              seen: true
+            });
 
-          await setDoc(doc(db, 'chats', cId), {
-            lastMsg: reply.slice(0, 80),
-            lastMsgAt: serverTimestamp(),
-            lastMsgBy: YUKI_BOT_UID,
-            touchAt: serverTimestamp()
-          }, { merge: true });
-        } catch(e) {
-          console.error('Yuki reply save error:', e);
-          showToast('Yuki reply could not be saved' + (e && e.code ? ' (' + e.code + ')' : ''));
+            if (activeChatId === cId) {
+              const localItems = msgCache.get(cId) || [];
+              if (!localItems.some(item => item.id === replyRef.id)) {
+                localItems.push({ id: replyRef.id, msg: { text: reply, by: YUKI_BOT_UID, at: new Date(), seen: true } });
+                localItems.sort((a, b) => {
+                  const at = toDate(a.msg.at)?.getTime() || 0;
+                  const bt = toDate(b.msg.at)?.getTime() || 0;
+                  return at - bt;
+                });
+                msgCache.set(cId, localItems);
+                renderMessages(cId, localItems);
+              }
+            }
+
+            await setDoc(doc(db, 'chats', cId), {
+              lastMsg: reply.slice(0, 80),
+              lastMsgAt: serverTimestamp(),
+              lastMsgBy: YUKI_BOT_UID,
+              touchAt: serverTimestamp()
+            }, { merge: true });
+          } catch(e) {
+            console.error('Yuki reply save error:', e);
+            replyError = 'Yuki AI replied, but the reply could not be saved.';
+          }
+        }
+
+        if (replyError && activeChatId === cId) {
+          const errorId = `yuki-error-${Date.now()}`;
+          const localItems = msgCache.get(cId) || [];
+          localItems.push({ id: errorId, msg: { text: replyError, by: YUKI_BOT_UID, at: new Date(), isError: true, seen: true } });
+          msgCache.set(cId, localItems);
+          renderMessages(cId, localItems);
         }
       }, 650);
     }
@@ -4437,23 +4771,7 @@ $('btnContextDeleteChat')?.addEventListener('click', () => {
 });
 </script>
 
-<script>
-(function(){
-  var errs=[];
-  function show(force){
-    if(window.__chatBooted && !force) return;
-    var b=document.getElementById('bootDiag');
-    if(!b){ b=document.createElement('div'); b.id='bootDiag';
-      b.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;z-index:99999;background:#7f1d1d;color:#fff;padding:10px 12px;border-radius:12px;font:12px/1.4 monospace;max-height:50vh;overflow:auto;white-space:pre-wrap';
-      document.body.appendChild(b); }
-    b.textContent=(window.__chatBooted?'App error:\n':'App did not start:\n')+errs.join('\n')+'\n\n(Screenshot this box and send it)';
-  }
-  window.addEventListener('error',function(e){ if(!e.message) return; if(/ResizeObserver loop/i.test(e.message)){ e.stopImmediatePropagation(); e.preventDefault(); return; } errs.push(e.message+(e.filename?' @'+String(e.filename).split('/').pop()+':'+e.lineno:'')); setTimeout(function(){show(true)},300); },true);
-  window.addEventListener('unhandledrejection',function(e){ errs.push('promise: '+((e.reason&&e.reason.message)||e.reason)); setTimeout(function(){show(true)},300); });
-  window.addEventListener('fbloadfail',function(){ errs.push('Firebase failed to load: '+window.__fbLoadError+'\nCheck internet / VPN / ad-blocker blocking gstatic.com'); show(true); });
-  setTimeout(function(){ if(!window.__chatBooted){ if(!errs.length) errs.push('no error captured - Firebase still loading (slow/blocked network?)'); show(); } },7000);
-})();
-</script>
+
 <style id="kbFixSupport">
 /* Keyboard fix: html never scrolls; inputs are >=16px on touch devices so iOS doesn't zoom/shift the page on focus */
 html { height: 100%; overflow: hidden; overscroll-behavior: none; }
@@ -4517,6 +4835,60 @@ body { top: 0; left: 0; right: 0; }
   document.addEventListener('focusout', burstSync, true);
   window.addEventListener('orientationchange', function(){ setTimeout(sync, 150); }, { passive: true });
   sync();
+})();
+</script>
+
+<script>
+/* Settings extras: popup close fix + new preferences (home = website, menu = chat). No existing function touched. */
+(function(){
+  var d=document.getElementById('settingsDrawer');
+  if(d){
+    var sync=function(){
+      if(d.classList.contains('chat-context')) d.dataset.ctx='chat';
+      else if(d.classList.contains('menu-context')) d.dataset.ctx='menu';
+    };
+    new MutationObserver(sync).observe(d,{attributes:true,attributeFilter:['class']});
+    sync();
+  }
+  var KEY='yukiPrefs', root=document.documentElement;
+  var DEF={grey:0,fs:1,accent:0,rm:0,hc:0,cl:0,hp:0,wall:0,ts:1,mav:1,cb:0};
+  var P={}, k;
+  for(k in DEF) P[k]=DEF[k];
+  try{
+    var saved=JSON.parse(localStorage.getItem(KEY)||'{}');
+    for(k in DEF) if(typeof saved[k]==='number') P[k]=saved[k];
+  }catch(e){}
+  var NAMES={
+    fs:['Small','Medium','Large'],
+    accent:['Ocean','Royal','Sky','Indigo'],
+    wall:['Default','Sky','Dots','Night']
+  };
+  var DATA={grey:'pGrey',fs:'pFs',accent:'pAccent',rm:'pRm',hc:'pHc',cl:'pCl',wall:'pWall',ts:'pTs',mav:'pMav',cb:'pCb'};
+  function apply(){
+    for(var key in DATA) root.dataset[DATA[key]]=String(P[key]);
+    var rows=document.querySelectorAll('[data-pref]');
+    for(var i=0;i<rows.length;i++){
+      var r=rows[i], pk=r.dataset.pref;
+      if(pk==='reset') continue;
+      var sw=r.querySelector('[data-sw]'), val=r.querySelector('[data-val]');
+      if(sw) sw.classList.toggle('on',!!P[pk]);
+      if(val&&NAMES[pk]) val.textContent=NAMES[pk][P[pk]];
+    }
+  }
+  function save(){ try{localStorage.setItem(KEY,JSON.stringify(P));}catch(e){} }
+  document.addEventListener('click',function(e){
+    var t=e.target;
+    if(!t||!t.closest) return;
+    if(P.hp&&navigator.vibrate&&t.closest('button,.settings-row,.chat-card')){ try{navigator.vibrate(8);}catch(x){} }
+    var r=t.closest('[data-pref]');
+    if(!r) return;
+    var pk=r.dataset.pref;
+    if(pk==='reset'){ for(var q in DEF) P[q]=DEF[q]; }
+    else if(r.dataset.type==='cycle'){ P[pk]=(P[pk]+1)%Number(r.dataset.n); }
+    else { P[pk]=P[pk]?0:1; }
+    save(); apply();
+  });
+  apply();
 })();
 </script>
 </body>
