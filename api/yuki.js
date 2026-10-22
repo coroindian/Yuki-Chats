@@ -37,9 +37,7 @@ export default async function handler(req, res) {
       model: "gemini-3.8-flash",
       systemInstruction: SYSTEM_PROMPT,
       generationConfig: {
-        temperature: 0.8,
-        maxOutputTokens: 250,
-        topP: 0.95
+        maxOutputTokens: 250
       }
     });
 
@@ -53,20 +51,50 @@ export default async function handler(req, res) {
       )
       .map(h => ({
         role: h.role === "assistant" ? "model" : "user",
-        parts: [
-          {
-            text: String(h.content).slice(0, 2000)
-          }
-        ]
+        parts: [{ text: String(h.content).slice(0, 2000) }]
       }));
 
     const chat = model.startChat({
       history: chatHistory
     });
 
-    const result = await chat.sendMessage(
-      message.slice(0, 2000)
-    );
+    // Retry temporary Gemini errors automatically.
+    let result;
+    const maxRetries = 3;
+
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        result = await chat.sendMessage(message.slice(0, 2000));
+        break;
+      } catch (err) {
+        const status = Number(
+          err?.status ||
+          err?.response?.status ||
+          0
+        );
+
+        const errMsg = String(err?.message || err);
+
+        const retryable =
+          status === 408 ||
+          status === 429 ||
+          status >= 500 ||
+          /\b(408|429|500|502|503|504)\b/.test(errMsg) ||
+          /Service Unavailable|temporarily|high demand|overload/i.test(errMsg);
+
+        if (!retryable || attempt === maxRetries) {
+          throw err;
+        }
+
+        const delay =
+          Math.min(8000, 1000 * (2 ** attempt)) +
+          Math.floor(Math.random() * 300);
+
+        await new Promise(resolve =>
+          setTimeout(resolve, delay)
+        );
+      }
+    }
 
     let reply = result.response.text()?.trim() || "";
 
