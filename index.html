@@ -9,7 +9,7 @@
 <link rel="icon" href="https://lh3.googleusercontent.com/aida-public/AB6AXuB4sBVUR8Nz47PlRnmU7Mn9yBzGxjtHQbmswmVJ8g5JBLmgwhevUrlEWaiPvzu5NGe_l3mKI1oWJzedHAZUWp_1iqSxEfaynl9A6aduhVIbZY_4KOtC4c22tAzKQJYC1E7gQtuq_k0JbQTLEPWTB2buOrT_ts7cIa-kfTMx_dbvLkbqkM7D00p3E_VLcpHPW49Vuv8tc_TAMxQCZGc2hpKdGpIkXY9j6A6mDYHzquEG8yWXaVh_tMpOUw">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
 :root {
   --bg-canvas: #e8effa;
@@ -85,7 +85,7 @@ body {
   position: fixed;
   background: var(--bg-canvas);
   background-image: var(--bg-gradient);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: "Roboto", "Helvetica Neue", Arial, sans-serif;
   color: var(--text-main);
   overscroll-behavior: none;
 }
@@ -715,13 +715,6 @@ svg { width: 1.15em; height: 1.15em; fill: none; stroke: currentColor; stroke-wi
 }
 .chat-message-row.is-mine .msg-bubble { align-self: flex-end; }
 
-/* Yuki AI error messages */
-.chat-message-row.is-error .msg-bubble {
-  color: var(--accent-red);
-  border-color: rgba(244, 63, 94, 0.28);
-  background: color-mix(in srgb, var(--accent-red) 7%, var(--bubble-incoming));
-}
-
 /* Smooth message animations (only for NEW messages) */
 .chat-message-row { contain: layout style paint; will-change: transform, opacity; }
 .chat-message-row:not(.is-mine) {
@@ -1323,7 +1316,7 @@ svg { width: 1.15em; height: 1.15em; fill: none; stroke: currentColor; stroke-wi
    TYPOGRAPHY  (lighter, cleaner, professional)
    ========================================================================== */
 html, body {
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: "Roboto", "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -2312,7 +2305,6 @@ body, .device-wrapper { height: var(--app-h, 100dvh); }
 #settingsDrawer[data-ctx="chat"]:not(.chat-context):not(.menu-context) #chatContextActions { display: block !important; }
 
 /* ---- preference effects ---- */
-:root[data-p-grey="1"] { filter: grayscale(1); }
 :root[data-p-fs="0"] .msg-bubble { font-size: 13px; }
 :root[data-p-fs="2"] .msg-bubble { font-size: 16.5px; }
 :root[data-p-fs="0"] .chat-card-name { font-size: 14px; }
@@ -2341,15 +2333,341 @@ body, .device-wrapper { height: var(--app-h, 100dvh); }
 :root[data-p-cl="1"] .chat-card .chat-card-avatar { width: 36px; height: 36px; font-size: 14px; }
 :root[data-p-cl="1"] .chat-card::after { left: 64px; }
 
-:root[data-p-wall="1"] .messages-container { background: linear-gradient(180deg, #dcebff 0%, #f1f6ff 100%); }
-:root[data-p-wall="2"] .messages-container { background-color: #eef3fa; background-image: radial-gradient(rgba(29,114,254,.14) 1.2px, transparent 1.4px); background-size: 18px 18px; }
-:root[data-p-wall="3"] .messages-container { background: linear-gradient(180deg, #0e1a33 0%, #0a1426 100%); }
-:root[data-theme="dark"][data-p-wall="1"] .messages-container { background: linear-gradient(180deg, #14233f 0%, #0d1626 100%); }
-:root[data-theme="dark"][data-p-wall="2"] .messages-container { background-color: #0d131f; background-image: radial-gradient(rgba(96,165,250,.16) 1.2px, transparent 1.4px); background-size: 18px 18px; }
-:root[data-p-wall="3"] .msg-sender-name { color: #94a3b8; }
 :root[data-p-ts="0"] .msg-time { display: none; }
 :root[data-p-mav="0"] .messages-container .msg-avatar { display: none; }
 :root[data-p-cb="1"] .msg-bubble { padding: 7px 11px; line-height: 1.32; }
+
+/* ==========================================================================
+   SETTINGS ICONS: black in light mode, white in dark mode (no blue)
+   ========================================================================== */
+:root { --icon-fg: #000000; }
+:root[data-theme="dark"] { --icon-fg: #ffffff; }
+#settingsDrawer #drawerMainView .settings-icon,
+#settingsDrawer #drawerMainView .settings-icon.danger { color: var(--icon-fg) !important; }
+#settingsDrawer #drawerMainView .settings-icon svg { stroke: var(--icon-fg) !important; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ==========================================================================
+   AMOLED MODE: works on top of Light AND Dark (does not force a theme)
+   Dark  + AMOLED = pure black    |   Light + AMOLED = pure white
+   Only backgrounds / surfaces / borders / text change.
+   Buttons, accent colour, avatars (DP colours) and toggles keep their colours.
+   ========================================================================== */
+:root[data-theme="dark"][data-p-amoled="1"][data-p-fs][data-p-accent] {
+  --icon-fg: #ffffff;
+  --bg-canvas: #000000; --bg-gradient: linear-gradient(#000000, #000000);
+  --app-bg: #000000; --card-bg: #0a0a0a; --card-hover: #151515; --surface-subtle: #101010;
+  --primary-blue-light: #151515;
+  --text-main: #f2f2f2; --text-muted: #8c8c8c; --border-subtle: #1c1c1c;
+  --shadow-sm: none; --shadow-md: none; --shadow-lg: none;
+  --bubble-incoming: #101010; --bubble-incoming-text: #f2f2f2;
+  --header-bg: rgba(0, 0, 0, 0.96); --nav-inactive: #8c8c8c;
+  --scrim-bg: rgba(0, 0, 0, 0.8);
+  color-scheme: dark;
+}
+:root[data-p-amoled="1"]:not([data-theme="dark"])[data-p-fs][data-p-accent] {
+  --icon-fg: #000000;
+  --bg-canvas: #ffffff; --bg-gradient: linear-gradient(#ffffff, #ffffff);
+  --app-bg: #ffffff; --card-bg: #ffffff; --card-hover: #f2f2f2; --surface-subtle: #f6f6f6;
+  --primary-blue-light: #f2f2f2;
+  --text-main: #0a0a0a; --text-muted: #6b6b6b; --border-subtle: #e6e6e6;
+  --shadow-sm: none; --shadow-md: none; --shadow-lg: none;
+  --bubble-incoming: #f2f2f2; --bubble-incoming-text: #0a0a0a;
+  --header-bg: rgba(255, 255, 255, 0.96); --nav-inactive: #6b6b6b;
+  --scrim-bg: rgba(0, 0, 0, 0.4);
+  color-scheme: light;
+}
+:root[data-theme="dark"][data-p-amoled="1"][data-p-fs][data-p-accent][data-p-hc="1"] { --text-main: #ffffff; --text-muted: #c8c8c8; --border-subtle: #3a3a3a; }
+:root[data-p-amoled="1"]:not([data-theme="dark"])[data-p-fs][data-p-accent][data-p-hc="1"] { --text-main: #000000; --text-muted: #3f3f3f; --border-subtle: #b5b5b5; }
+/* toggles: neutral off-state, accent colour when on */
+:root[data-theme="dark"][data-p-amoled="1"] .toggle-switch { background: #2a2a2a; }
+:root[data-theme="dark"][data-p-amoled="1"] .toggle-switch.on { background: var(--primary-blue); }
+:root[data-p-amoled="1"]:not([data-theme="dark"]) .toggle-switch { background: #d4d4d4; }
+/* popup shadows */
+:root[data-theme="dark"][data-p-amoled="1"] #settingsDrawer { box-shadow: 0 10px 28px rgba(0, 0, 0, 0.85); }
+:root[data-p-amoled="1"]:not([data-theme="dark"]) #settingsDrawer { box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12); }
+
+/* ==========================================================================
+   SETTINGS POPUP: wider (no cut-off text), website-matched typography
+   ========================================================================== */
+#settingsDrawer { width: 272px; border-radius: var(--radius-lg); background: var(--card-bg); border: 1px solid var(--border-subtle); }
+#settingsDrawer:has(#drawerMainView.hidden) { width: 316px; }
+#settingsDrawer #drawerMainView .settings-row { gap: 16px; height: 46px; min-height: 46px; max-height: 46px; padding: 0 16px; }
+#settingsDrawer #drawerMainView .settings-main-title { font-size: 14.5px; font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0; }
+#settingsDrawer #drawerMainView .settings-row:active { background: var(--card-hover) !important; }
+@media (hover: hover) and (pointer: fine) { #settingsDrawer #drawerMainView .settings-row:hover { background: var(--card-hover) !important; } }
+#settingsDrawer #drawerMainView .settings-icon { width: 24px; height: 24px; }
+
+/* ==========================================================================
+   SETTINGS ICONS: YouTube-style (Material filled-outline glyphs), black in light / white in dark
+   ========================================================================== */
+:root { --icon-fg: #000000; }
+:root[data-theme="dark"] { --icon-fg: #ffffff; }
+#settingsDrawer #drawerMainView .settings-icon,
+#settingsDrawer #drawerMainView .settings-icon.danger { color: var(--icon-fg) !important; }
+#settingsDrawer #drawerMainView .settings-icon svg { width: 24px; height: 24px; fill: var(--icon-fg) !important; stroke: none !important; }
+
+/* boot diagnostics box is never shown */
+#bootDiag { display: none !important; }
+
+/* Settings gear + three-dot icon: no circle boundary, icon only */
+#btnOpenSettings,
+#btnChatSettingsGear {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+#btnOpenSettings:active,
+#btnChatSettingsGear:active {
+  background: transparent;
+}
+
+/* Search icon: icon only, same as settings icon */
+#btnToggleSearch {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+#btnToggleSearch:active { background: transparent; }
+#btnToggleSearch.active { color: var(--primary-blue); }
+
+/* ==========================================================================
+   PROFILE VIEW (settings popup): compact, minimal, professional
+   ========================================================================== */
+#drawerProfileView > div:first-child { padding: 6px 0 14px !important; }
+#drawerProfileView #subviewProfileAvatar {
+  width: 76px !important;
+  height: 76px !important;
+  margin: 0 auto 10px !important;
+  font-size: 26px !important;
+  box-shadow: 0 0 0 2px var(--card-bg), 0 0 0 4px var(--primary-blue);
+}
+/* "Change Photo": plain text action instead of a pill button */
+#drawerProfileView #btnTriggerPhotoUpload {
+  height: auto;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--primary-blue);
+  font-size: 13px !important;
+  font-weight: 500;
+}
+#drawerProfileView #btnTriggerPhotoUpload:active { background: var(--primary-blue-light); transform: none; }
+
+/* fields */
+#drawerProfileView .profile-form-group { margin-bottom: 12px; }
+#drawerProfileView .profile-form-label {
+  margin: 0 0 5px 2px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+#drawerProfileView .profile-input {
+  height: 40px;
+  border-radius: 10px;
+  padding: 0 12px;
+  font-size: 14px;
+  background: var(--surface-subtle);
+  border: 1px solid transparent;
+}
+#drawerProfileView .profile-input:focus { background: var(--card-bg); border-color: var(--primary-blue); box-shadow: none; }
+#drawerProfileView #inputEmail {
+  background: transparent;
+  border-color: transparent;
+  padding-left: 2px;
+  color: var(--text-muted);
+}
+
+/* Save: small tonal buttons, not big solid ones */
+#drawerProfileView #btnSaveDisplayName,
+#drawerProfileView #btnSaveUsername {
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 10px;
+  background: var(--primary-blue-light);
+  color: var(--primary-blue);
+  font-size: 13px;
+  font-weight: 500;
+  align-self: auto;
+}
+#drawerProfileView #btnSaveDisplayName:active,
+#drawerProfileView #btnSaveUsername:active { transform: scale(0.96); }
+#drawerProfileView #tipUsernameCopy { margin-top: 5px !important; margin-left: 2px; font-size: 11.5px !important; cursor: pointer; }
+
+/* Log out: quiet text action under a thin divider */
+#drawerProfileView > div:last-child {
+  margin-top: 6px;
+  padding-top: 8px !important;
+  border-top: 1px solid var(--border-subtle);
+}
+#drawerProfileView #btnLogout {
+  height: 40px;
+  border-radius: 10px;
+  background: transparent;
+  color: #ef4444;
+  font-size: 14px;
+  font-weight: 500;
+}
+#drawerProfileView #btnLogout:active { background: rgba(239, 68, 68, 0.1); }
+
+/* One single Save icon in the corner; the two separate Save buttons are hidden */
+#drawerProfileView #btnSaveDisplayName,
+#drawerProfileView #btnSaveUsername { display: none !important; }
+/* Profile screen: the X in the header is replaced by a single Save tick */
+#btnProfileSaveAll { display: none; color: var(--primary-blue); }
+#btnProfileSaveAll svg { width: 20px; height: 20px; stroke-width: 2.4; }
+#settingsDrawer:has(#drawerProfileView.active) #btnDrawerClose { display: none; }
+#settingsDrawer:has(#drawerProfileView.active) #btnProfileSaveAll { display: grid; }
+
+/* ==========================================================================
+   DIRECTS / AI ROOM slider: minimal sliding pill (tab bar only)
+   ========================================================================== */
+#inboxTabBar {
+  gap: 0;
+  padding: 4px;
+  margin-bottom: 14px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: rgba(100, 116, 139, 0.14);
+}
+#inboxTabBar .inbox-tab {
+  position: relative;
+  z-index: 1;
+  padding: 9px 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+  transition: color 0.3s ease, transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+#inboxTabBar .inbox-tab.active { color: var(--text-main); font-weight: 600; }
+#inboxTabBar .inbox-tab:hover { color: var(--text-main); }
+#inboxTabBar .inbox-tab-indicator {
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  height: auto;
+  width: calc((100% - 8px) / 2);
+  border-radius: var(--radius-full);
+  background: var(--card-bg);
+  box-shadow: var(--shadow-sm), 0 0 0 1px var(--border-subtle);
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* dark mode: soft translucent track + lighter pill so the slider reads clearly */
+:root[data-theme="dark"] #inboxTabBar { background: rgba(255, 255, 255, 0.07); }
+:root[data-theme="dark"] #inboxTabBar .inbox-tab-indicator {
+  background: rgba(255, 255, 255, 0.14);
+  box-shadow: none;
+}
+:root[data-theme="dark"] #inboxTabBar .inbox-tab.active { color: #ffffff; }
+
+/* Search bar: hidden until the search icon is tapped; unrolls from the icon side (right to left) */
+#searchBoxWrap {
+  height: 0;
+  margin-bottom: 0;
+  border-width: 0;
+  overflow: hidden;
+  clip-path: inset(0 0 0 100% round 22px);
+  visibility: hidden;
+  pointer-events: none;
+  transition: clip-path 0.36s cubic-bezier(0.7, 0, 0.84, 0),
+              height 0.3s cubic-bezier(0.22, 1, 0.36, 1) 0.1s,
+              margin-bottom 0.3s cubic-bezier(0.22, 1, 0.36, 1) 0.1s,
+              border-width 0.3s ease 0.1s,
+              visibility 0s linear 0.4s;
+}
+#searchBoxWrap > * {
+  opacity: 0;
+  transform: translateX(14px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+#searchBoxWrap.search-open {
+  height: 44px;
+  margin-bottom: 14px;
+  border-width: 1px;
+  clip-path: inset(0 0 0 0 round 22px);
+  visibility: visible;
+  pointer-events: auto;
+  transition: height 0.26s cubic-bezier(0.22, 1, 0.36, 1),
+              margin-bottom 0.26s cubic-bezier(0.22, 1, 0.36, 1),
+              border-width 0.2s ease,
+              clip-path 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.08s,
+              visibility 0s;
+}
+#searchBoxWrap.search-open > * {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.3s ease 0.22s, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+}
+#searchBoxWrap.search-open > #searchClear { opacity: 0; transform: scale(0.6); }
+#searchBoxWrap.search-open.has-value > #searchClear { opacity: 1; transform: scale(1); }
+
+/* ==========================================================================
+   DIRECTS / AI ROOM slider: minimal sliding pill (tab bar only)
+   ========================================================================== */
+#inboxTabBar {
+  gap: 0;
+  padding: 4px;
+  margin-bottom: 14px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: rgba(100, 116, 139, 0.14);
+}
+#inboxTabBar .inbox-tab {
+  position: relative;
+  z-index: 1;
+  padding: 9px 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+  transition: color 0.3s ease, transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+#inboxTabBar .inbox-tab.active { color: var(--text-main); font-weight: 600; }
+#inboxTabBar .inbox-tab:hover { color: var(--text-main); }
+#inboxTabBar .inbox-tab-indicator {
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  height: auto;
+  width: calc((100% - 8px) / 2);
+  border-radius: var(--radius-full);
+  background: var(--card-bg);
+  box-shadow: var(--shadow-sm), 0 0 0 1px var(--border-subtle);
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Search bar: hidden until the search icon is tapped, slides/fades in */
+#searchBoxWrap {
+  height: 0;
+  margin-bottom: 0;
+  border-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  transform: translateY(-10px) scale(0.98);
+  transform-origin: top center;
+  visibility: hidden;
+  pointer-events: none;
+  transition: height 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+              margin-bottom 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+              border-width 0.34s ease,
+              opacity 0.28s ease,
+              transform 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+              visibility 0s linear 0.34s;
+}
+#searchBoxWrap.search-open {
+  height: 44px;
+  margin-bottom: 14px;
+  border-width: 1px;
+  opacity: 1;
+  transform: none;
+  visibility: visible;
+  pointer-events: auto;
+  transition: height 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+              margin-bottom 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+              border-width 0.34s ease,
+              opacity 0.28s ease,
+              transform 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+              visibility 0s;
+}
 </style>
 </head>
 <body>
@@ -2396,6 +2714,9 @@ body, .device-wrapper { height: var(--app-h, 100dvh); }
       </div>
       <div class="header-actions">
         
+        <button class="action-btn-circle" id="btnToggleSearch" aria-label="Search" title="Search" aria-expanded="false">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        </button>
         <button class="action-btn-circle" id="btnOpenSettings" aria-label="Settings" title="Settings">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         </button>
@@ -2553,6 +2874,9 @@ body, .device-wrapper { height: var(--app-h, 100dvh); }
       <button class="action-btn-circle" id="btnDrawerClose" aria-label="Close Settings">
         <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
       </button>
+      <button class="action-btn-circle" id="btnProfileSaveAll" aria-label="Save" title="Save">
+        <svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+      </button>
     </div>
 
     <div class="drawer-body">
@@ -2561,7 +2885,7 @@ body, .device-wrapper { height: var(--app-h, 100dvh); }
         <div class="settings-sec-label">Account</div>
         <div class="settings-card">
           <div class="settings-row" id="rowOpenProfile">
-            <span class="settings-icon "><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+            <span class="settings-icon "><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM7.07 18.28c.43-.9 3.05-1.78 4.93-1.78s4.51.88 4.93 1.78C15.57 19.36 13.86 20 12 20s-3.57-.64-4.93-1.72zm11.29-1.45c-1.43-1.74-4.9-2.33-6.36-2.33s-4.93.59-6.36 2.33C4.62 15.49 4 13.82 4 12c0-4.41 3.59-8 8-8s8 3.59 8 8c0 1.82-.62 3.49-1.64 4.83zM12 6c-1.94 0-3.5 1.56-3.5 3.5S10.06 13 12 13s3.5-1.56 3.5-3.5S13.94 6 12 6zm0 5c-.83 0-1.5-.67-1.5-1.5S11.17 8 12 8s1.5.67 1.5 1.5S12.83 11 12 11z"/></svg></span>
             <div class="settings-info">
               <span class="settings-main-title">Profile</span>
               <span class="settings-sub-title">Display name, unique username & photo</span>
@@ -2573,7 +2897,7 @@ body, .device-wrapper { height: var(--app-h, 100dvh); }
         <div class="settings-sec-label">Appearance</div>
         <div class="settings-card">
           <div class="settings-row" id="rowToggleTheme">
-            <span class="settings-icon "><svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span>
+            <span class="settings-icon "><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg></span>
             <div class="settings-info">
               <span class="settings-main-title">Dark Mode</span>
               <span class="settings-sub-title">Toggle between Light & Dark themes</span>
@@ -2585,7 +2909,7 @@ body, .device-wrapper { height: var(--app-h, 100dvh); }
         <div class="settings-sec-label">Safety & Privacy</div>
         <div class="settings-card">
           <div class="settings-row" id="rowOpenBlockList">
-            <span class="settings-icon "><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg></span>
+            <span class="settings-icon "><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM4 12c0-4.42 3.58-8 8-8 1.85 0 3.55.63 4.9 1.69L5.69 16.9A7.902 7.902 0 0 1 4 12zm8 8c-1.85 0-3.55-.63-4.9-1.69L18.31 7.1A7.902 7.902 0 0 1 20 12c0 4.42-3.58 8-8 8z"/></svg></span>
             <div class="settings-info">
               <span class="settings-main-title">Block List</span>
               <span class="settings-sub-title">Manage accounts you have blocked</span>
@@ -2597,42 +2921,42 @@ body, .device-wrapper { height: var(--app-h, 100dvh); }
         <div class="settings-sec-label">Preferences</div>
         <div class="settings-card" id="homePrefsCard">
             <div class="settings-row pm-pref" id="rowPrefTextSize" data-pref="fs" data-type="cycle" data-n="3">
-              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg></span>
+              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M9 4v3h5v12h3V7h5V4H9zm-6 8h3v7h3v-7h3V9H3v3z"/></svg></span>
               <div class="settings-info"><span class="settings-main-title">Text Size</span></div>
               <span class="pm-value" data-val></span>
             </div>
             <div class="settings-row pm-pref" id="rowPrefAccent" data-pref="accent" data-type="cycle" data-n="4">
-              <span class="settings-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z"/></svg></span>
+              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M12 22C6.49 22 2 17.51 2 12S6.49 2 12 2s10 4.04 10 9c0 3.31-2.69 6-6 6h-1.77c-.28 0-.5.22-.5.5 0 .12.05.23.13.33.41.47.64 1.06.64 1.67 0 1.38-1.12 2.5-2.5 2.5zm0-18c-4.41 0-8 3.59-8 8s3.59 8 8 8c.28 0 .5-.22.5-.5a.54.54 0 0 0-.14-.35c-.41-.46-.63-1.05-.63-1.65 0-1.38 1.12-2.5 2.5-2.5H16c2.21 0 4-1.79 4-4 0-3.86-3.59-7-8-7z"/><circle cx="6.5" cy="11.5" r="1.5"/><circle cx="9.5" cy="7.5" r="1.5"/><circle cx="14.5" cy="7.5" r="1.5"/><circle cx="17.5" cy="11.5" r="1.5"/></svg></span>
               <div class="settings-info"><span class="settings-main-title">Accent Colour</span></div>
               <span class="pm-value" data-val></span>
             </div>
             <div class="settings-row pm-pref" id="rowPrefReduceMotion" data-pref="rm" data-type="toggle">
-              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>
+              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M20.38 8.57l-1.23 1.85a8 8 0 0 1-.22 7.58H5.07A8 8 0 0 1 15.58 6.85l1.85-1.23A10 10 0 0 0 3.35 19a2 2 0 0 0 1.72 1h13.85a2 2 0 0 0 1.74-1 10 10 0 0 0-.27-10.44zm-9.79 6.84a2 2 0 0 0 2.83 0l5.66-8.49-8.49 5.66a2 2 0 0 0 0 2.83z"/></svg></span>
               <div class="settings-info"><span class="settings-main-title">Reduce Motion</span></div>
               <div class="toggle-switch" data-sw></div>
             </div>
             <div class="settings-row pm-pref" id="rowPrefContrast" data-pref="hc" data-type="toggle">
-              <span class="settings-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/></svg></span>
+              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18V4c4.41 0 8 3.59 8 8s-3.59 8-8 8z"/></svg></span>
               <div class="settings-info"><span class="settings-main-title">High Contrast</span></div>
               <div class="toggle-switch" data-sw></div>
             </div>
             <div class="settings-row pm-pref" id="rowPrefCompactList" data-pref="cl" data-type="toggle">
-              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></span>
+              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M4 10.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm0-6c-.83 0-1.5.67-1.5 1.5S3.17 7.5 4 7.5 5.5 6.83 5.5 6 4.83 4.5 4 4.5zm0 12c-.83 0-1.5.68-1.5 1.5s.68 1.5 1.5 1.5 1.5-.68 1.5-1.5-.67-1.5-1.5-1.5zM7 19h14v-2H7v2zm0-6h14v-2H7v2zm0-8v2h14V5H7z"/></svg></span>
               <div class="settings-info"><span class="settings-main-title">Compact Chat List</span></div>
               <div class="toggle-switch" data-sw></div>
             </div>
             <div class="settings-row pm-pref" id="rowPrefHaptics" data-pref="hp" data-type="toggle">
-              <span class="settings-icon"><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></span>
+              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M0 15h2V9H0v6zm3 2h2V7H3v10zm19-8v6h2V9h-2zm-3 8h2V7h-2v10zM16.5 3h-9C6.67 3 6 3.67 6 4.5v15c0 .83.67 1.5 1.5 1.5h9c.83 0 1.5-.67 1.5-1.5v-15c0-.83-.67-1.5-1.5-1.5zM16 19H8V5h8v14z"/></svg></span>
               <div class="settings-info"><span class="settings-main-title">Vibration Feedback</span></div>
               <div class="toggle-switch" data-sw></div>
             </div>
-            <div class="settings-row pm-pref" id="rowPrefGrey" data-pref="grey" data-type="toggle">
-              <span class="settings-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg></span>
-              <div class="settings-info"><span class="settings-main-title">Grey Mode</span></div>
+            <div class="settings-row pm-pref" id="rowPrefAmoled" data-pref="amoled" data-type="toggle">
+              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg></span>
+              <div class="settings-info"><span class="settings-main-title">AMOLED Mode</span></div>
               <div class="toggle-switch" data-sw></div>
             </div>
             <div class="settings-row pm-pref" id="rowPrefReset" data-pref="reset" data-type="action">
-              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></span>
+              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M12 5V2L8 6l4 4V7c3.31 0 6 2.69 6 6 0 2.97-2.17 5.43-5 5.91v2.02c3.95-.49 7-3.85 7-7.93 0-4.42-3.58-8-8-8zm-6 8c0-1.65.67-3.15 1.76-4.24L6.34 7.34A7.959 7.959 0 0 0 4 13c0 4.08 3.05 7.44 7 7.93v-2.02c-2.83-.48-5-2.94-5-5.91z"/></svg></span>
               <div class="settings-info"><span class="settings-main-title">Reset Preferences</span></div>
               
             </div>
@@ -2641,7 +2965,7 @@ body, .device-wrapper { height: var(--app-h, 100dvh); }
         <div class="settings-sec-label">Danger Zone</div>
         <div class="settings-card">
           <div class="settings-row" id="rowDeleteAccount">
-            <span class="settings-icon danger"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></span>
+            <span class="settings-icon danger"><svg viewBox="0 0 24 24"><path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z"/></svg></span>
             <div class="settings-info">
               <span class="settings-main-title" style="color:#ef4444">Delete Account</span>
               <span class="settings-sub-title">Permanently remove your account</span>
@@ -2655,48 +2979,43 @@ body, .device-wrapper { height: var(--app-h, 100dvh); }
           <div class="settings-sec-label">Chat Actions</div>
           <div class="settings-card">
             <div class="settings-row" id="btnContextTheme">
-              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span>
+              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg></span>
               <div class="settings-info">
                 <span class="settings-main-title">Dark Mode</span>
                 <span class="settings-sub-title">Toggle between Light & Dark themes</span>
               </div>
               <div class="toggle-switch" id="switchContextTheme"></div>
             </div>
-            <div class="settings-row pm-pref" id="rowChatWallpaper" data-pref="wall" data-type="cycle" data-n="4">
-              <span class="settings-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></span>
-              <div class="settings-info"><span class="settings-main-title">Chat Wallpaper</span></div>
-              <span class="pm-value" data-val></span>
-            </div>
             <div class="settings-row pm-pref" id="rowChatTimestamps" data-pref="ts" data-type="toggle">
-              <span class="settings-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg></span>
               <div class="settings-info"><span class="settings-main-title">Message Time</span></div>
               <div class="toggle-switch" data-sw></div>
             </div>
             <div class="settings-row pm-pref" id="rowChatAvatars" data-pref="mav" data-type="toggle">
-              <span class="settings-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>
+              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M12 6c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2m0 9c2.7 0 5.8 1.29 6 2v1H6v-1c.2-.71 3.3-2 6-2m0-11C9.79 4 8 5.79 8 8s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 9c-2.67 0-8 1.34-8 4v3h16v-3c0-2.66-5.33-4-8-4z"/></svg></span>
               <div class="settings-info"><span class="settings-main-title">Message Avatars</span></div>
               <div class="toggle-switch" data-sw></div>
             </div>
             <div class="settings-row pm-pref" id="rowChatCompact" data-pref="cb" data-type="toggle">
-              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 10h8"/></svg></span>
+              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/></svg></span>
               <div class="settings-info"><span class="settings-main-title">Compact Bubbles</span></div>
               <div class="toggle-switch" data-sw></div>
             </div>
             <div class="settings-row" id="btnContextBlock">
-              <span class="settings-icon danger"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg></span>
+              <span class="settings-icon danger"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM4 12c0-4.42 3.58-8 8-8 1.85 0 3.55.63 4.9 1.69L5.69 16.9A7.902 7.902 0 0 1 4 12zm8 8c-1.85 0-3.55-.63-4.9-1.69L18.31 7.1A7.902 7.902 0 0 1 20 12c0 4.42-3.58 8-8 8z"/></svg></span>
               <div class="settings-info">
                 <span class="settings-main-title" style="color:#ef4444" id="labelBlockChatUser">Block User</span>
               </div>
             </div>
             <div class="settings-row" id="btnContextClearChat">
-              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="m9 8 6 6M15 8l-6 6"/></svg></span>
+              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M5 13h14v-2H5v2zm-2 4h14v-2H3v2zM7 7v2h14V7H7z"/></svg></span>
               <div class="settings-info">
                 <span class="settings-main-title">Clear Chats</span>
                 <span class="settings-sub-title">Delete all messages, keep the contact</span>
               </div>
             </div>
             <div class="settings-row" id="btnContextDeleteChat">
-              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></span>
+              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z"/></svg></span>
               <div class="settings-info">
                 <span class="settings-main-title">Delete Conversation</span>
                 <span class="settings-sub-title">Hide this chat from your directs</span>
@@ -3020,6 +3339,8 @@ let searchDebounce = null;
 let typingTimeout = null;
 let lastTypingTime = 0;
 let yukiHistory = [];
+/* Yuki AI endpoint. Set window.YUKI_API_URL before this script (or edit here) if the API lives on another domain. */
+const YUKI_API_URL = window.YUKI_API_URL || '/api/yuki';
 
 /* --- THEME CONTROLLER --- */
 const THEME_STORAGE_KEY = 'yuki_app_theme';
@@ -3698,6 +4019,7 @@ function openChatView(peerUid, profile = null) {
     }, { merge: true }).catch(e => console.warn('Yuki chat init:', e)).then(() => {
       if (activeChatId === _yid && !unsubscribeMessages) subscribeToMessages(_yid);
     });
+    if (!unsubscribeMessages) subscribeToMessages(_yid); // don't wait for the server ack to show bubbles
   } else {
     subscribeToMessages(activeChatId);
   }
@@ -3814,12 +4136,11 @@ function makeDateDivider(ts) {
 
 function buildMessageRow(id, msg, animate) {
   const isMine = msg.by === currentUser?.uid;
-  const isError = !!msg.isError;
   const senderName = isMine ? (currentProfile?.display || 'You') : (activePeer?.display || 'Operator');
   const timeStr = formatClock(msg.at);
 
   const row = document.createElement('div');
-  row.className = 'chat-message-row' + (isMine ? ' is-mine' : '') + (isError ? ' is-error' : '') + (animate ? '' : ' no-anim');
+  row.className = 'chat-message-row' + (isMine ? ' is-mine' : '') + (animate ? '' : ' no-anim');
   row.dataset.id = id;
   row.innerHTML = `
     <div class="msg-bubble-wrap">
@@ -3937,7 +4258,8 @@ function subscribeToMessages(chatId) {
     limit(200)
   ), snap => {
     if (activeChatId !== chatId) return;
-    msgCache.set(chatId, snap.docs.map(d => ({ id: d.id, msg: d.data({ serverTimestamps: 'estimate' }) })));
+    window.__msgSubOk = chatId; window.__msgSubRetry = 0;
+    msgCache.set(chatId, yukiMergeLocal(chatId, snap.docs.map(d => ({ id: d.id, msg: d.data({ serverTimestamps: 'estimate' }) }))));
 
     const lastMsgDoc = snap.docs[snap.docs.length - 1];
     if (lastMsgDoc && activePeer && !activePeer.isYuki) {
@@ -3963,7 +4285,40 @@ function subscribeToMessages(chatId) {
         updateDoc(doc(db, 'chats', chatId), { [`unread.${currentUser.uid}`]: 0 }).catch(()=>{});
       }
     }
-  }, err => console.error('Messages sync error:', err));
+  }, err => {
+    console.error('Messages sync error:', err);
+    window.__msgSubOk = null;
+    // Yuki chat: listener can die if it attached before the chat doc existed -> retry a few times
+    if (activePeer && activePeer.isYuki && activeChatId === chatId && (window.__msgSubRetry || 0) < 4) {
+      window.__msgSubRetry = (window.__msgSubRetry || 0) + 1;
+      setTimeout(() => {
+        if (activeChatId === chatId && window.__msgSubOk !== chatId) {
+          unsubscribeMessages && unsubscribeMessages();
+          unsubscribeMessages = null;
+          subscribeToMessages(chatId);
+        }
+      }, 1500 * window.__msgSubRetry);
+    }
+  });
+}
+
+/* Yuki fallback store: if Firestore refuses to save an AI reply, keep it on this device so it still shows and survives refresh */
+function yukiLocalKey(chatId) { return 'yukiLocalMsgs:' + chatId; }
+function yukiLocalLoad(chatId) { try { return JSON.parse(localStorage.getItem(yukiLocalKey(chatId)) || '[]'); } catch (e) { return []; } }
+function yukiLocalAdd(chatId, text) {
+  const arr = yukiLocalLoad(chatId).slice(-50);
+  arr.push({ id: 'local_' + Date.now(), text, by: YUKI_BOT_UID, at: Date.now(), seen: true });
+  try { localStorage.setItem(yukiLocalKey(chatId), JSON.stringify(arr)); } catch (e) {}
+}
+function yukiMergeLocal(chatId, items) {
+  if (!activePeer || !activePeer.isYuki) return items;
+  const local = yukiLocalLoad(chatId);
+  if (!local.length) return items;
+  const have = new Set(items.filter(i => i.msg && i.msg.by === YUKI_BOT_UID).map(i => i.msg.text));
+  const extra = local.filter(l => !have.has(l.text)).map(l => ({ id: l.id, msg: { text: l.text, by: l.by, at: l.at, seen: true } }));
+  if (!extra.length) return items;
+  const ms = i => { const d = toDate(i.msg.at); return d ? d.getTime() : Date.now(); };
+  return items.concat(extra).sort((a, b) => ms(a) - ms(b));
 }
 
 /* ==========================================================================
@@ -4032,26 +4387,16 @@ async function handleSendMessage() {
       }, { merge: true });
       if (activeChatId === cId && !unsubscribeMessages) subscribeToMessages(cId);
     }
-    const sentMessageRef = await addDoc(collection(db, 'chats', cId, 'messages'), {
+    await addDoc(collection(db, 'chats', cId, 'messages'), {
       text,
       by: currentUser.uid,
       at: serverTimestamp(),
       seen: false
     });
-
-    // Render the just-sent Yuki message immediately; Firestore realtime will reconcile it.
-    if (peer.isYuki && activeChatId === cId) {
-      const localItems = msgCache.get(cId) || [];
-      if (!localItems.some(item => item.id === sentMessageRef.id)) {
-        localItems.push({ id: sentMessageRef.id, msg: { text, by: currentUser.uid, at: new Date(), seen: false } });
-        localItems.sort((a, b) => {
-          const at = toDate(a.msg.at)?.getTime() || 0;
-          const bt = toDate(b.msg.at)?.getTime() || 0;
-          return at - bt;
-        });
-        msgCache.set(cId, localItems);
-        renderMessages(cId, localItems);
-      }
+    if (peer.isYuki && activeChatId === cId && window.__msgSubOk !== cId) {
+      unsubscribeMessages && unsubscribeMessages();
+      unsubscribeMessages = null;
+      subscribeToMessages(cId);
     }
 
     await setDoc(doc(db, 'chats', cId), {
@@ -4079,69 +4424,54 @@ async function handleSendMessage() {
     // AI companion reply flow
     if (peer.isYuki) {
       setTimeout(async () => {
-        let reply = '';
-        let replyError = '';
+        let reply = '...';
         try {
-          const res = await fetch('/api/yuki', {
+          const res = await fetch(YUKI_API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ message: text, history: yukiHistory })
           });
-          if (!res.ok) {
-            throw new Error(`Yuki API request failed (${res.status})`);
+          if (res.ok) {
+            const data = await res.json();
+            reply = data.reply || data.response || data.message || data.text || data.answer || data.output ||
+              (data.choices && data.choices[0] && ((data.choices[0].message && data.choices[0].message.content) || data.choices[0].text)) ||
+              (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text) ||
+              '...';
+            if (typeof reply !== 'string') reply = JSON.stringify(reply);
+          } else {
+            console.warn('Yuki API HTTP', res.status);
+            reply = "Yuki AI se abhi connect nahi ho pa raha (server error " + res.status + "). Thodi der baad dobara try karo.";
           }
-          const data = await res.json();
-          reply = data.reply || data.response || data.message || data.text || '';
-          if (!reply) throw new Error('Yuki API returned an empty response.');
         } catch(e) {
-          console.error('Yuki API error:', e);
-          replyError = 'Yuki AI could not reply right now. Please try again.';
+          console.warn('Yuki API call failed:', e);
+          reply = "Yuki AI se abhi connect nahi ho pa raha. Internet / API URL check karo aur dobara try karo.";
         }
 
-        if (reply) {
-          yukiHistory.push({ role: 'user', content: text }, { role: 'assistant', content: reply });
-          yukiHistory = yukiHistory.slice(-20);
+        yukiHistory.push({ role: 'user', content: text }, { role: 'assistant', content: reply });
+        yukiHistory = yukiHistory.slice(-20);
 
-          try {
-            const replyRef = await addDoc(collection(db, 'chats', cId, 'messages'), {
-              text: reply,
-              by: YUKI_BOT_UID,
-              at: serverTimestamp(),
-              seen: true
-            });
+        try {
+          await addDoc(collection(db, 'chats', cId, 'messages'), {
+            text: reply,
+            by: YUKI_BOT_UID,
+            at: serverTimestamp(),
+            seen: true
+          });
 
-            if (activeChatId === cId) {
-              const localItems = msgCache.get(cId) || [];
-              if (!localItems.some(item => item.id === replyRef.id)) {
-                localItems.push({ id: replyRef.id, msg: { text: reply, by: YUKI_BOT_UID, at: new Date(), seen: true } });
-                localItems.sort((a, b) => {
-                  const at = toDate(a.msg.at)?.getTime() || 0;
-                  const bt = toDate(b.msg.at)?.getTime() || 0;
-                  return at - bt;
-                });
-                msgCache.set(cId, localItems);
-                renderMessages(cId, localItems);
-              }
-            }
-
-            await setDoc(doc(db, 'chats', cId), {
-              lastMsg: reply.slice(0, 80),
-              lastMsgAt: serverTimestamp(),
-              lastMsgBy: YUKI_BOT_UID,
-              touchAt: serverTimestamp()
-            }, { merge: true });
-          } catch(e) {
-            console.error('Yuki reply save error:', e);
-            replyError = 'Yuki AI replied, but the reply could not be saved.';
+          await setDoc(doc(db, 'chats', cId), {
+            lastMsg: reply.slice(0, 80),
+            lastMsgAt: serverTimestamp(),
+            lastMsgBy: YUKI_BOT_UID,
+            touchAt: serverTimestamp()
+          }, { merge: true });
+        } catch(e) {
+          console.error('Yuki reply save error:', e);
+          yukiLocalAdd(cId, reply);
+          if (activeChatId === cId) {
+            const base = (msgCache.get(cId) || []).filter(i => !String(i.id).startsWith('local_'));
+            msgCache.set(cId, yukiMergeLocal(cId, base));
+            renderMessages(cId, msgCache.get(cId));
           }
-        }
-
-        if (replyError && activeChatId === cId) {
-          const errorId = `yuki-error-${Date.now()}`;
-          const localItems = msgCache.get(cId) || [];
-          localItems.push({ id: errorId, msg: { text: replyError, by: YUKI_BOT_UID, at: new Date(), isError: true, seen: true } });
-          msgCache.set(cId, localItems);
-          renderMessages(cId, localItems);
         }
       }, 650);
     }
@@ -4771,7 +5101,24 @@ $('btnContextDeleteChat')?.addEventListener('click', () => {
 });
 </script>
 
-
+<script>
+(function(){
+  var errs=[];
+  function show(force){
+    try{ console.warn('[boot diagnostics]', errs.join(' | ')); }catch(_){}
+    return; /* red diagnostics box removed */
+    var b=document.getElementById('bootDiag');
+    if(!b){ b=document.createElement('div'); b.id='bootDiag';
+      b.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;z-index:99999;background:#7f1d1d;color:#fff;padding:10px 12px;border-radius:12px;font:12px/1.4 monospace;max-height:50vh;overflow:auto;white-space:pre-wrap';
+      document.body.appendChild(b); }
+    b.textContent=(window.__chatBooted?'App error:\n':'App did not start:\n')+errs.join('\n')+'\n\n(Screenshot this box and send it)';
+  }
+  window.addEventListener('error',function(e){ if(!e.message) return; if(/ResizeObserver loop/i.test(e.message)){ e.stopImmediatePropagation(); e.preventDefault(); return; } errs.push(e.message+(e.filename?' @'+String(e.filename).split('/').pop()+':'+e.lineno:'')); setTimeout(function(){show(true)},300); },true);
+  window.addEventListener('unhandledrejection',function(e){ errs.push('promise: '+((e.reason&&e.reason.message)||e.reason)); setTimeout(function(){show(true)},300); });
+  window.addEventListener('fbloadfail',function(){ errs.push('Firebase failed to load: '+window.__fbLoadError+'\nCheck internet / VPN / ad-blocker blocking gstatic.com'); show(true); });
+  setTimeout(function(){ if(!window.__chatBooted){ if(!errs.length) errs.push('no error captured - Firebase still loading (slow/blocked network?)'); show(); } },7000);
+})();
+</script>
 <style id="kbFixSupport">
 /* Keyboard fix: html never scrolls; inputs are >=16px on touch devices so iOS doesn't zoom/shift the page on focus */
 html { height: 100%; overflow: hidden; overscroll-behavior: none; }
@@ -4851,7 +5198,7 @@ body { top: 0; left: 0; right: 0; }
     sync();
   }
   var KEY='yukiPrefs', root=document.documentElement;
-  var DEF={grey:0,fs:1,accent:0,rm:0,hc:0,cl:0,hp:0,wall:0,ts:1,mav:1,cb:0};
+  var DEF={amoled:0,fs:1,accent:0,rm:0,hc:0,cl:0,hp:0,ts:1,mav:1,cb:0};
   var P={}, k;
   for(k in DEF) P[k]=DEF[k];
   try{
@@ -4860,10 +5207,9 @@ body { top: 0; left: 0; right: 0; }
   }catch(e){}
   var NAMES={
     fs:['Small','Medium','Large'],
-    accent:['Ocean','Royal','Sky','Indigo'],
-    wall:['Default','Sky','Dots','Night']
+    accent:['Ocean','Royal','Sky','Indigo']
   };
-  var DATA={grey:'pGrey',fs:'pFs',accent:'pAccent',rm:'pRm',hc:'pHc',cl:'pCl',wall:'pWall',ts:'pTs',mav:'pMav',cb:'pCb'};
+  var DATA={amoled:'pAmoled',fs:'pFs',accent:'pAccent',rm:'pRm',hc:'pHc',cl:'pCl',ts:'pTs',mav:'pMav',cb:'pCb'};
   function apply(){
     for(var key in DATA) root.dataset[DATA[key]]=String(P[key]);
     var rows=document.querySelectorAll('[data-pref]');
@@ -4889,6 +5235,86 @@ body { top: 0; left: 0; right: 0; }
     save(); apply();
   });
   apply();
+})();
+</script>
+<script>
+/* Bubble fit: removes the empty strip on the right of wrapped chat bubbles (display only). */
+(function(){
+  var box=document.getElementById('messagesContainer');
+  if(!box) return;
+  var root=document.documentElement, raf=0, lastW=0;
+  function sigOf(b){ return b.textContent+'|'+box.clientWidth+'|'+(root.dataset.pFs||'')+'|'+(root.dataset.pCb||'')+'|'+(root.dataset.pTs||''); }
+  function run(){
+    raf=0;
+    if(!box.clientWidth) return;
+    var list=[].slice.call(box.querySelectorAll('.msg-bubble')).filter(function(b){ return b.__fit!==sigOf(b); });
+    if(!list.length) return;
+    list.forEach(function(b){ b.style.width=''; });
+    var info=list.map(function(b){
+      var cs=getComputedStyle(b), r=b.getBoundingClientRect(), rg=document.createRange(), maxR=0, i;
+      rg.selectNodeContents(b);
+      var rects=rg.getClientRects();
+      for(i=0;i<rects.length;i++){ if(rects[i].width>0 && rects[i].right>maxR) maxR=rects[i].right; }
+      var pad=(parseFloat(cs.paddingRight)||0)+(parseFloat(cs.borderRightWidth)||0);
+      return { b:b, h:r.height, w:r.width, need: maxR ? Math.ceil(maxR-r.left+pad)+1 : 0 };
+    });
+    info.forEach(function(x){ if(x.need>0 && x.need<x.w-1) x.b.style.width=x.need+'px'; });
+    info.forEach(function(x){
+      if(x.b.style.width && x.b.getBoundingClientRect().height>x.h+1) x.b.style.width='';
+      x.b.__fit=sigOf(x.b);
+    });
+  }
+  function sched(){ if(!raf) raf=requestAnimationFrame(run); }
+  new MutationObserver(sched).observe(box,{childList:true,subtree:true,characterData:true});
+  new MutationObserver(sched).observe(root,{attributes:true,attributeFilter:['data-p-fs','data-p-cb','data-p-ts']});
+  if(window.ResizeObserver) new ResizeObserver(function(){ var w=box.clientWidth; if(w!==lastW){ lastW=w; sched(); } }).observe(box);
+  if(document.fonts){ if(document.fonts.ready) document.fonts.ready.then(sched); }
+  sched();
+})();
+</script>
+<script>
+/* Search icon: show / hide the search bar */
+(function(){
+  var btn=document.getElementById('btnToggleSearch');
+  var wrap=document.getElementById('searchBoxWrap');
+  var input=document.getElementById('searchInput');
+  if(!btn||!wrap) return;
+  btn.addEventListener('click',function(){
+    var open=!wrap.classList.contains('search-open');
+    wrap.classList.toggle('search-open',open);
+    btn.classList.toggle('active',open);
+    btn.setAttribute('aria-expanded',open?'true':'false');
+    if(open){
+      setTimeout(function(){ if(input) input.focus(); },120);
+    } else {
+      if(input) input.blur();
+      var clr=document.getElementById('searchClear');
+      if(clr && input && input.value) clr.click();
+    }
+  });
+})();
+</script>
+<script>
+/* Single Save icon: saves whichever of Display Name / Username was changed (uses the existing save buttons) */
+(function(){
+  var view=document.getElementById('drawerProfileView');
+  var btn=document.getElementById('btnProfileSaveAll');
+  var nameIn=document.getElementById('inputDisplayName');
+  var userIn=document.getElementById('inputUsername');
+  var nameBtn=document.getElementById('btnSaveDisplayName');
+  var userBtn=document.getElementById('btnSaveUsername');
+  if(!view||!btn||!nameIn||!userIn||!nameBtn||!userBtn) return;
+  var base={n:'',u:''};
+  function snap(){ base.n=nameIn.value; base.u=userIn.value; }
+  new MutationObserver(function(){ if(view.classList.contains('active')) snap(); })
+    .observe(view,{attributes:true,attributeFilter:['class']});
+  btn.addEventListener('click',function(){
+    var nameChanged=nameIn.value!==base.n;
+    var userChanged=userIn.value!==base.u;
+    if(nameChanged) nameBtn.click();
+    if(userChanged) userBtn.click();
+    if(nameChanged||userChanged) setTimeout(snap,0);
+  });
 })();
 </script>
 </body>
