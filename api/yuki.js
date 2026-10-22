@@ -1,6 +1,8 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY
+});
 
 const SYSTEM_PROMPT = `You are Yuki, a friendly and helpful AI companion inside a chat app.
 Rules:
@@ -16,30 +18,30 @@ export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  if (req.method === "OPTIONS") return res.status(200).end();
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
 
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+    return res.status(405).json({
+      error: "Method not allowed"
+    });
   }
 
   try {
     const { message, history = [] } = req.body || {};
 
     if (!message || typeof message !== "string" || !message.trim()) {
-      return res.status(400).json({ error: "Message is required" });
+      return res.status(400).json({
+        error: "Message is required"
+      });
     }
 
-    if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).json({ error: "API key missing" });
+    if (!process.env.GROQ_API_KEY) {
+      return res.status(500).json({
+        error: "Groq API key missing"
+      });
     }
-
-    const model = genAI.getGenerativeModel({
-      model: "gemini-3.8-flash",
-      systemInstruction: SYSTEM_PROMPT,
-      generationConfig: {
-        maxOutputTokens: 250
-      }
-    });
 
     const chatHistory = (Array.isArray(history) ? history : [])
       .slice(-10)
@@ -50,53 +52,31 @@ export default async function handler(req, res) {
           (h.role === "user" || h.role === "assistant")
       )
       .map(h => ({
-        role: h.role === "assistant" ? "model" : "user",
-        parts: [{ text: String(h.content).slice(0, 2000) }]
+        role: h.role === "assistant" ? "assistant" : "user",
+        content: String(h.content).slice(0, 2000)
       }));
 
-    const chat = model.startChat({
-      history: chatHistory
+    const messages = [
+      {
+        role: "system",
+        content: SYSTEM_PROMPT
+      },
+      ...chatHistory,
+      {
+        role: "user",
+        content: message.slice(0, 2000)
+      }
+    ];
+
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      messages,
+      temperature: 0.8,
+      max_tokens: 250
     });
 
-    // Retry temporary Gemini errors automatically.
-    let result;
-    const maxRetries = 3;
-
-    for (let attempt = 0; attempt <= maxRetries; attempt++) {
-      try {
-        result = await chat.sendMessage(message.slice(0, 2000));
-        break;
-      } catch (err) {
-        const status = Number(
-          err?.status ||
-          err?.response?.status ||
-          0
-        );
-
-        const errMsg = String(err?.message || err);
-
-        const retryable =
-          status === 408 ||
-          status === 429 ||
-          status >= 500 ||
-          /\b(408|429|500|502|503|504)\b/.test(errMsg) ||
-          /Service Unavailable|temporarily|high demand|overload/i.test(errMsg);
-
-        if (!retryable || attempt === maxRetries) {
-          throw err;
-        }
-
-        const delay =
-          Math.min(8000, 1000 * (2 ** attempt)) +
-          Math.floor(Math.random() * 300);
-
-        await new Promise(resolve =>
-          setTimeout(resolve, delay)
-        );
-      }
-    }
-
-    let reply = result.response.text()?.trim() || "";
+    let reply =
+      completion?.choices?.[0]?.message?.content?.trim() || "";
 
     const lines = reply.split("\n").filter(Boolean);
 
@@ -108,7 +88,9 @@ export default async function handler(req, res) {
       reply = "Hmm, couldn't think of a reply. Try again?";
     }
 
-    return res.status(200).json({ reply });
+    return res.status(200).json({
+      reply
+    });
 
   } catch (err) {
     console.error("Yuki API error:", err);
@@ -116,17 +98,18 @@ export default async function handler(req, res) {
     const msg = String(err?.message || err);
 
     if (
-      msg.includes("API_KEY_INVALID") ||
-      msg.includes("API key not valid")
+      msg.includes("401") ||
+      msg.includes("Invalid API Key") ||
+      msg.includes("invalid_api_key")
     ) {
       return res.status(500).json({
-        error: "Invalid Gemini API key"
+        error: "Invalid Groq API key"
       });
     }
 
     if (
-      msg.includes("quota") ||
-      msg.includes("429")
+      msg.includes("429") ||
+      msg.toLowerCase().includes("rate limit")
     ) {
       return res.status(429).json({
         error: "Rate limit reached. Try again in a minute."
