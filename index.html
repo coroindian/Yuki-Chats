@@ -1622,7 +1622,9 @@ body, .device-wrapper { height: var(--app-h, 100dvh); }
 }
 .toggle-switch.on::before { opacity: 1; }
 .toggle-switch.on { background: #cbd5e1; }
-:root[data-theme="dark"] .toggle-switch.on::before { opacity: 0; }
+:root[data-theme="dark"] .toggle-switch.on { background: #334155; }
+:root[data-theme="dark"] .toggle-switch.on::before { opacity: 1; }
+.toggle-switch.on::before { background: var(--primary-blue); }
 .toggle-switch:after { transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1); }
 .toggle-switch:active:after { transform: none; }
 .toggle-switch.on:active:after { transform: translateX(20px); }
@@ -2552,120 +2554,68 @@ body, .device-wrapper { height: var(--app-h, 100dvh); }
   box-shadow: var(--shadow-sm), 0 0 0 1px var(--border-subtle);
   transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
-/* dark mode: soft translucent track + lighter pill so the slider reads clearly */
+/* dark mode (AMOLED on): neutral translucent track + lighter pill */
 :root[data-theme="dark"] #inboxTabBar { background: rgba(255, 255, 255, 0.07); }
 :root[data-theme="dark"] #inboxTabBar .inbox-tab-indicator {
   background: rgba(255, 255, 255, 0.14);
   box-shadow: none;
 }
 :root[data-theme="dark"] #inboxTabBar .inbox-tab.active { color: #ffffff; }
+/* dark mode (AMOLED off): soft grey-blue tone */
+:root[data-theme="dark"]:not([data-p-amoled="1"]) #inboxTabBar { background: rgba(124, 146, 186, 0.12); }
+:root[data-theme="dark"]:not([data-p-amoled="1"]) #inboxTabBar .inbox-tab-indicator {
+  background: rgba(124, 146, 186, 0.24);
+  box-shadow: none;
+}
+:root[data-theme="dark"]:not([data-p-amoled="1"]) #inboxTabBar .inbox-tab { color: #8e9bb3; }
+:root[data-theme="dark"]:not([data-p-amoled="1"]) #inboxTabBar .inbox-tab.active { color: #e6ecf8; }
 
-/* Search bar: hidden until the search icon is tapped; unrolls from the icon side (right to left) */
-#searchBoxWrap {
-  height: 0;
+/* Search bar and slide bar share one slot and morph into each other (soft blur + lift crossfade) */
+.search-tab-slot { display: grid; margin-bottom: 14px; }
+.search-tab-slot > #inboxTabBar,
+.search-tab-slot > #searchBoxWrap { grid-area: 1 / 1; align-self: center; }
+
+.search-tab-slot > #inboxTabBar {
   margin-bottom: 0;
-  border-width: 0;
-  overflow: hidden;
-  clip-path: inset(0 0 0 100% round 22px);
-  visibility: hidden;
-  pointer-events: none;
-  transition: clip-path 0.36s cubic-bezier(0.7, 0, 0.84, 0),
-              height 0.3s cubic-bezier(0.22, 1, 0.36, 1) 0.1s,
-              margin-bottom 0.3s cubic-bezier(0.22, 1, 0.36, 1) 0.1s,
-              border-width 0.3s ease 0.1s,
-              visibility 0s linear 0.4s;
-}
-#searchBoxWrap > * {
-  opacity: 0;
-  transform: translateX(14px);
-  transition: opacity 0.18s ease, transform 0.18s ease;
-}
-#searchBoxWrap.search-open {
-  height: 44px;
-  margin-bottom: 14px;
-  border-width: 1px;
-  clip-path: inset(0 0 0 0 round 22px);
-  visibility: visible;
-  pointer-events: auto;
-  transition: height 0.26s cubic-bezier(0.22, 1, 0.36, 1),
-              margin-bottom 0.26s cubic-bezier(0.22, 1, 0.36, 1),
-              border-width 0.2s ease,
-              clip-path 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.08s,
+  transition: opacity 0.32s ease 0.12s,
+              transform 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.1s,
+              filter 0.32s ease 0.1s,
               visibility 0s;
 }
-#searchBoxWrap.search-open > * {
-  opacity: 1;
-  transform: none;
-  transition: opacity 0.3s ease 0.22s, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
-}
-#searchBoxWrap.search-open > #searchClear { opacity: 0; transform: scale(0.6); }
-#searchBoxWrap.search-open.has-value > #searchClear { opacity: 1; transform: scale(1); }
-
-/* ==========================================================================
-   DIRECTS / AI ROOM slider: minimal sliding pill (tab bar only)
-   ========================================================================== */
-#inboxTabBar {
-  gap: 0;
-  padding: 4px;
-  margin-bottom: 14px;
-  border: 0;
-  border-radius: var(--radius-full);
-  background: rgba(100, 116, 139, 0.14);
-}
-#inboxTabBar .inbox-tab {
-  position: relative;
-  z-index: 1;
-  padding: 9px 0;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-muted);
-  transition: color 0.3s ease, transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
-}
-#inboxTabBar .inbox-tab.active { color: var(--text-main); font-weight: 600; }
-#inboxTabBar .inbox-tab:hover { color: var(--text-main); }
-#inboxTabBar .inbox-tab-indicator {
-  top: 4px;
-  bottom: 4px;
-  left: 4px;
-  height: auto;
-  width: calc((100% - 8px) / 2);
-  border-radius: var(--radius-full);
-  background: var(--card-bg);
-  box-shadow: var(--shadow-sm), 0 0 0 1px var(--border-subtle);
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-/* Search bar: hidden until the search icon is tapped, slides/fades in */
-#searchBoxWrap {
-  height: 0;
-  margin-bottom: 0;
-  border-width: 0;
+.search-tab-slot.search-mode > #inboxTabBar {
   opacity: 0;
-  overflow: hidden;
-  transform: translateY(-10px) scale(0.98);
-  transform-origin: top center;
+  transform: translateY(-8px) scale(0.97);
+  filter: blur(6px);
   visibility: hidden;
   pointer-events: none;
-  transition: height 0.34s cubic-bezier(0.22, 1, 0.36, 1),
-              margin-bottom 0.34s cubic-bezier(0.22, 1, 0.36, 1),
-              border-width 0.34s ease,
-              opacity 0.28s ease,
-              transform 0.34s cubic-bezier(0.22, 1, 0.36, 1),
-              visibility 0s linear 0.34s;
+  transition: opacity 0.2s ease,
+              transform 0.3s cubic-bezier(0.4, 0, 1, 1),
+              filter 0.25s ease,
+              visibility 0s linear 0.3s;
+}
+
+#searchBoxWrap {
+  height: 44px;
+  margin-bottom: 0;
+  opacity: 0;
+  transform: translateY(8px) scale(0.97);
+  filter: blur(6px);
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease,
+              transform 0.3s cubic-bezier(0.4, 0, 1, 1),
+              filter 0.25s ease,
+              visibility 0s linear 0.3s;
 }
 #searchBoxWrap.search-open {
-  height: 44px;
-  margin-bottom: 14px;
-  border-width: 1px;
   opacity: 1;
   transform: none;
+  filter: none;
   visibility: visible;
   pointer-events: auto;
-  transition: height 0.34s cubic-bezier(0.22, 1, 0.36, 1),
-              margin-bottom 0.34s cubic-bezier(0.22, 1, 0.36, 1),
-              border-width 0.34s ease,
-              opacity 0.28s ease,
-              transform 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+  transition: opacity 0.32s ease 0.12s,
+              transform 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.1s,
+              filter 0.32s ease 0.1s,
               visibility 0s;
 }
 </style>
@@ -2728,17 +2678,8 @@ body, .device-wrapper { height: var(--app-h, 100dvh); }
 
     <!-- Scrollable Inbox List -->
     <div class="inbox-scroll-body">
-      <!-- Search Input -->
-      <div class="search-container" id="searchBoxWrap">
-        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        <input id="searchInput" type="text" name="yk-find-handle" placeholder="Search by username..." inputmode="search" enterkeyhint="search" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-bwignore="true" data-form-type="other">
-        <button id="searchClear" aria-label="Clear Search"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-      </div>
-
-      <!-- Search Results Dropdown -->
-      <div id="searchResultsView"></div>
-
-      <!-- Main Tabs (Rooms vs Directs) -->
+      <!-- Slide bar <-> Search bar (they swap places) -->
+      <div class="search-tab-slot" id="searchTabSlot">
       <div class="inbox-tab-bar" id="inboxTabBar">
         <button class="inbox-tab active" data-tab="0">
           <span>Directs</span>
@@ -2749,6 +2690,15 @@ body, .device-wrapper { height: var(--app-h, 100dvh); }
         </button>
         <div class="inbox-tab-indicator" id="tabIndicator"></div>
       </div>
+      <div class="search-container" id="searchBoxWrap">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="searchInput" type="text" name="yk-find-handle" placeholder="Search by username..." inputmode="search" enterkeyhint="search" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-bwignore="true" data-form-type="other">
+        <button id="searchClear" aria-label="Clear Search"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </div>
+      </div>
+
+      <!-- Search Results Dropdown -->
+      <div id="searchResultsView"></div>
 
       <!-- Panes for Directs & Rooms -->
       <div class="panes-wrapper">
@@ -2841,6 +2791,12 @@ body, .device-wrapper { height: var(--app-h, 100dvh); }
       <!-- Mentions Suggestions Autocomplete -->
       <div class="mentions-box" id="mentionsBox"></div>
 
+      <!-- Reply / Edit bar -->
+      <div class="reply-bar" id="replyBar">
+        <div class="reply-bar-body"><b id="replyBarLabel">Replying</b><span id="replyBarText"></span></div>
+        <button id="replyBarClose" aria-label="Cancel"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </div>
+
       <div class="composer-inner">
         <button class="composer-btn" id="btnAttachFile" aria-label="Attach File">
           <svg viewBox="0 0 24 24"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l7.9-7.9"/></svg>
@@ -2867,7 +2823,7 @@ body, .device-wrapper { height: var(--app-h, 100dvh); }
     <div class="drawer-header">
       <div class="drawer-title-group">
         <button class="drawer-back-btn" id="btnDrawerBack" style="display:none" aria-label="Back">
-          <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         </button>
         <h3 class="drawer-title" id="drawerTitle">Settings</h3>
       </div>
@@ -2882,96 +2838,84 @@ body, .device-wrapper { height: var(--app-h, 100dvh); }
     <div class="drawer-body">
       <!-- 1. MAIN DRAWER MENU -->
       <div id="drawerMainView">
-        <div class="settings-sec-label">Account</div>
-        <div class="settings-card">
+        <div class="settings-card mp-profile-card">
           <div class="settings-row" id="rowOpenProfile">
-            <span class="settings-icon "><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM7.07 18.28c.43-.9 3.05-1.78 4.93-1.78s4.51.88 4.93 1.78C15.57 19.36 13.86 20 12 20s-3.57-.64-4.93-1.72zm11.29-1.45c-1.43-1.74-4.9-2.33-6.36-2.33s-4.93.59-6.36 2.33C4.62 15.49 4 13.82 4 12c0-4.41 3.59-8 8-8s8 3.59 8 8c0 1.82-.62 3.49-1.64 4.83zM12 6c-1.94 0-3.5 1.56-3.5 3.5S10.06 13 12 13s3.5-1.56 3.5-3.5S13.94 6 12 6zm0 5c-.83 0-1.5-.67-1.5-1.5S11.17 8 12 8s1.5.67 1.5 1.5S12.83 11 12 11z"/></svg></span>
+            <div class="chat-card-avatar mp-avatar" id="menuProfileAvatar">U</div>
             <div class="settings-info">
-              <span class="settings-main-title">Profile</span>
-              <span class="settings-sub-title">Display name, unique username & photo</span>
+              <span class="settings-main-title" id="menuProfileName">Your profile</span>
+              <span class="settings-sub-title" id="menuProfileUser"></span>
             </div>
             <svg class="settings-chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
           </div>
         </div>
 
-        <div class="settings-sec-label">Appearance</div>
         <div class="settings-card">
-          <div class="settings-row" id="rowToggleTheme">
-            <span class="settings-icon "><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg></span>
+            <div class="settings-row" id="rowToggleTheme">
+            <span class="settings-icon theme-ico"><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></svg><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.3A8.2 8.2 0 0 1 9.7 4a8.2 8.2 0 1 0 10.3 10.3z"/></svg></span>
             <div class="settings-info">
               <span class="settings-main-title">Dark Mode</span>
               <span class="settings-sub-title">Toggle between Light & Dark themes</span>
             </div>
             <div class="toggle-switch" id="switchTheme"></div>
           </div>
+            <div class="settings-row pm-pref" id="rowPrefTextSize" data-pref="fs" data-type="cycle" data-n="3">
+              <span class="settings-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19l5-13 5 13M4.9 14.6h6.2M15.2 19l2.9-7.2 2.9 7.2M16.2 16.6h3.8"/></svg></span>
+              <div class="settings-info"><span class="settings-main-title">Text Size</span></div>
+              <span class="pm-value" data-val></span>
+            </div>
+            <div class="settings-row pm-pref" id="rowPrefAccent" data-pref="accent" data-type="cycle" data-n="4">
+              <span class="settings-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.4 0 2.1-1.1 1.7-2.2-.4-1.1.3-2.3 1.5-2.3H17a3.5 3.5 0 0 0 3.5-3.5C20.5 6.7 16.7 3.5 12 3.5z"/><circle cx="7.9" cy="11.6" r=".9"/><circle cx="10.6" cy="7.7" r=".9"/><circle cx="15.2" cy="7.9" r=".9"/></svg></span>
+              <div class="settings-info"><span class="settings-main-title">Accent Colour</span></div>
+              <span class="pm-value" data-val></span>
+            </div>
         </div>
 
-        <div class="settings-sec-label">Safety & Privacy</div>
+        <div class="settings-card" id="homePrefsCard">
+            <div class="settings-row pm-pref" id="rowPrefReduceMotion" data-pref="rm" data-type="toggle">
+              <span class="settings-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13.2 3 5.5 13.4h5.8L10.6 21l7.9-10.4h-5.8z"/></svg></span>
+              <div class="settings-info"><span class="settings-main-title">Reduce Motion</span></div>
+              <div class="toggle-switch" data-sw></div>
+            </div>
+            <div class="settings-row pm-pref" id="rowPrefContrast" data-pref="hc" data-type="toggle">
+              <span class="settings-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor" stroke="none"/></svg></span>
+              <div class="settings-info"><span class="settings-main-title">High Contrast</span></div>
+              <div class="toggle-switch" data-sw></div>
+            </div>
+            <div class="settings-row pm-pref" id="rowPrefCompactList" data-pref="cl" data-type="toggle">
+              <span class="settings-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg></span>
+              <div class="settings-info"><span class="settings-main-title">Compact Chat List</span></div>
+              <div class="toggle-switch" data-sw></div>
+            </div>
+            <div class="settings-row pm-pref" id="rowPrefHaptics" data-pref="hp" data-type="toggle">
+              <span class="settings-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="3.8" width="8" height="16.4" rx="2"/><path d="M4.6 9v6M19.4 9v6M2.2 10.8v2.4M21.8 10.8v2.4"/></svg></span>
+              <div class="settings-info"><span class="settings-main-title">Vibration Feedback</span></div>
+              <div class="toggle-switch" data-sw></div>
+            </div>
+            <div class="settings-row pm-pref" id="rowPrefAmoled" data-pref="amoled" data-type="toggle">
+              <span class="settings-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6.8" y="2.8" width="10.4" height="18.4" rx="2.6"/><path d="M10.4 18.2h3.2"/></svg></span>
+              <div class="settings-info"><span class="settings-main-title">AMOLED Mode</span></div>
+              <div class="toggle-switch" data-sw></div>
+            </div>
+        </div>
+
         <div class="settings-card">
-          <div class="settings-row" id="rowOpenBlockList">
-            <span class="settings-icon "><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM4 12c0-4.42 3.58-8 8-8 1.85 0 3.55.63 4.9 1.69L5.69 16.9A7.902 7.902 0 0 1 4 12zm8 8c-1.85 0-3.55-.63-4.9-1.69L18.31 7.1A7.902 7.902 0 0 1 20 12c0 4.42-3.58 8-8 8z"/></svg></span>
+            <div class="settings-row" id="rowOpenBlockList">
+            <span class="settings-icon "><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/></svg></span>
             <div class="settings-info">
               <span class="settings-main-title">Block List</span>
               <span class="settings-sub-title">Manage accounts you have blocked</span>
             </div>
             <svg class="settings-chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
           </div>
-        </div>
-
-        <div class="settings-sec-label">Preferences</div>
-        <div class="settings-card" id="homePrefsCard">
-            <div class="settings-row pm-pref" id="rowPrefTextSize" data-pref="fs" data-type="cycle" data-n="3">
-              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M9 4v3h5v12h3V7h5V4H9zm-6 8h3v7h3v-7h3V9H3v3z"/></svg></span>
-              <div class="settings-info"><span class="settings-main-title">Text Size</span></div>
-              <span class="pm-value" data-val></span>
-            </div>
-            <div class="settings-row pm-pref" id="rowPrefAccent" data-pref="accent" data-type="cycle" data-n="4">
-              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M12 22C6.49 22 2 17.51 2 12S6.49 2 12 2s10 4.04 10 9c0 3.31-2.69 6-6 6h-1.77c-.28 0-.5.22-.5.5 0 .12.05.23.13.33.41.47.64 1.06.64 1.67 0 1.38-1.12 2.5-2.5 2.5zm0-18c-4.41 0-8 3.59-8 8s3.59 8 8 8c.28 0 .5-.22.5-.5a.54.54 0 0 0-.14-.35c-.41-.46-.63-1.05-.63-1.65 0-1.38 1.12-2.5 2.5-2.5H16c2.21 0 4-1.79 4-4 0-3.86-3.59-7-8-7z"/><circle cx="6.5" cy="11.5" r="1.5"/><circle cx="9.5" cy="7.5" r="1.5"/><circle cx="14.5" cy="7.5" r="1.5"/><circle cx="17.5" cy="11.5" r="1.5"/></svg></span>
-              <div class="settings-info"><span class="settings-main-title">Accent Colour</span></div>
-              <span class="pm-value" data-val></span>
-            </div>
-            <div class="settings-row pm-pref" id="rowPrefReduceMotion" data-pref="rm" data-type="toggle">
-              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M20.38 8.57l-1.23 1.85a8 8 0 0 1-.22 7.58H5.07A8 8 0 0 1 15.58 6.85l1.85-1.23A10 10 0 0 0 3.35 19a2 2 0 0 0 1.72 1h13.85a2 2 0 0 0 1.74-1 10 10 0 0 0-.27-10.44zm-9.79 6.84a2 2 0 0 0 2.83 0l5.66-8.49-8.49 5.66a2 2 0 0 0 0 2.83z"/></svg></span>
-              <div class="settings-info"><span class="settings-main-title">Reduce Motion</span></div>
-              <div class="toggle-switch" data-sw></div>
-            </div>
-            <div class="settings-row pm-pref" id="rowPrefContrast" data-pref="hc" data-type="toggle">
-              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18V4c4.41 0 8 3.59 8 8s-3.59 8-8 8z"/></svg></span>
-              <div class="settings-info"><span class="settings-main-title">High Contrast</span></div>
-              <div class="toggle-switch" data-sw></div>
-            </div>
-            <div class="settings-row pm-pref" id="rowPrefCompactList" data-pref="cl" data-type="toggle">
-              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M4 10.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm0-6c-.83 0-1.5.67-1.5 1.5S3.17 7.5 4 7.5 5.5 6.83 5.5 6 4.83 4.5 4 4.5zm0 12c-.83 0-1.5.68-1.5 1.5s.68 1.5 1.5 1.5 1.5-.68 1.5-1.5-.67-1.5-1.5-1.5zM7 19h14v-2H7v2zm0-6h14v-2H7v2zm0-8v2h14V5H7z"/></svg></span>
-              <div class="settings-info"><span class="settings-main-title">Compact Chat List</span></div>
-              <div class="toggle-switch" data-sw></div>
-            </div>
-            <div class="settings-row pm-pref" id="rowPrefHaptics" data-pref="hp" data-type="toggle">
-              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M0 15h2V9H0v6zm3 2h2V7H3v10zm19-8v6h2V9h-2zm-3 8h2V7h-2v10zM16.5 3h-9C6.67 3 6 3.67 6 4.5v15c0 .83.67 1.5 1.5 1.5h9c.83 0 1.5-.67 1.5-1.5v-15c0-.83-.67-1.5-1.5-1.5zM16 19H8V5h8v14z"/></svg></span>
-              <div class="settings-info"><span class="settings-main-title">Vibration Feedback</span></div>
-              <div class="toggle-switch" data-sw></div>
-            </div>
-            <div class="settings-row pm-pref" id="rowPrefAmoled" data-pref="amoled" data-type="toggle">
-              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg></span>
-              <div class="settings-info"><span class="settings-main-title">AMOLED Mode</span></div>
-              <div class="toggle-switch" data-sw></div>
-            </div>
             <div class="settings-row pm-pref" id="rowPrefReset" data-pref="reset" data-type="action">
-              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M12 5V2L8 6l4 4V7c3.31 0 6 2.69 6 6 0 2.97-2.17 5.43-5 5.91v2.02c3.95-.49 7-3.85 7-7.93 0-4.42-3.58-8-8-8zm-6 8c0-1.65.67-3.15 1.76-4.24L6.34 7.34A7.959 7.959 0 0 0 4 13c0 4.08 3.05 7.44 7 7.93v-2.02c-2.83-.48-5-2.94-5-5.91z"/></svg></span>
+              <span class="settings-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4.6v4.4h4.4"/></svg></span>
               <div class="settings-info"><span class="settings-main-title">Reset Preferences</span></div>
               
             </div>
         </div>
 
-        <div class="settings-sec-label">Danger Zone</div>
-        <div class="settings-card">
-          <div class="settings-row" id="rowDeleteAccount">
-            <span class="settings-icon danger"><svg viewBox="0 0 24 24"><path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z"/></svg></span>
-            <div class="settings-info">
-              <span class="settings-main-title" style="color:#ef4444">Delete Account</span>
-              <span class="settings-sub-title">Permanently remove your account</span>
-            </div>
-            <svg class="settings-chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
-          </div>
+        <div class="mp-logout-wrap">
+          <button class="profile-pill-btn danger" id="btnLogout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4.5H6.5A2 2 0 0 0 4.5 6.5v11a2 2 0 0 0 2 2H10"/><path d="M14.5 8l4 4-4 4M18.5 12H9.5"/></svg>Log Out</button>
         </div>
 
         <!-- Chat Specific Actions when opened from active room -->
@@ -2979,7 +2923,7 @@ body, .device-wrapper { height: var(--app-h, 100dvh); }
           <div class="settings-sec-label">Chat Actions</div>
           <div class="settings-card">
             <div class="settings-row" id="btnContextTheme">
-              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg></span>
+              <span class="settings-icon theme-ico"><svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></svg><svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.3A8.2 8.2 0 0 1 9.7 4a8.2 8.2 0 1 0 10.3 10.3z"/></svg></span>
               <div class="settings-info">
                 <span class="settings-main-title">Dark Mode</span>
                 <span class="settings-sub-title">Toggle between Light & Dark themes</span>
@@ -2987,35 +2931,37 @@ body, .device-wrapper { height: var(--app-h, 100dvh); }
               <div class="toggle-switch" id="switchContextTheme"></div>
             </div>
             <div class="settings-row pm-pref" id="rowChatTimestamps" data-pref="ts" data-type="toggle">
-              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg></span>
+              <span class="settings-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.6V12l3 1.9"/></svg></span>
               <div class="settings-info"><span class="settings-main-title">Message Time</span></div>
               <div class="toggle-switch" data-sw></div>
             </div>
             <div class="settings-row pm-pref" id="rowChatAvatars" data-pref="mav" data-type="toggle">
-              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M12 6c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2m0 9c2.7 0 5.8 1.29 6 2v1H6v-1c.2-.71 3.3-2 6-2m0-11C9.79 4 8 5.79 8 8s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 9c-2.67 0-8 1.34-8 4v3h16v-3c0-2.66-5.33-4-8-4z"/></svg></span>
+              <span class="settings-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.6" r="3.5"/><path d="M5 20c.8-3.8 3.6-5.7 7-5.7s6.2 1.9 7 5.7"/></svg></span>
               <div class="settings-info"><span class="settings-main-title">Message Avatars</span></div>
               <div class="toggle-switch" data-sw></div>
             </div>
             <div class="settings-row pm-pref" id="rowChatCompact" data-pref="cb" data-type="toggle">
-              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/></svg></span>
+              <span class="settings-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 5h13A1.5 1.5 0 0 1 20 6.5v8a1.5 1.5 0 0 1-1.5 1.5H12l-4.5 3.6V16h-2A1.5 1.5 0 0 1 4 14.5v-8A1.5 1.5 0 0 1 5.5 5z"/></svg></span>
               <div class="settings-info"><span class="settings-main-title">Compact Bubbles</span></div>
               <div class="toggle-switch" data-sw></div>
             </div>
+            </div>
+          <div class="settings-card">
             <div class="settings-row" id="btnContextBlock">
-              <span class="settings-icon danger"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM4 12c0-4.42 3.58-8 8-8 1.85 0 3.55.63 4.9 1.69L5.69 16.9A7.902 7.902 0 0 1 4 12zm8 8c-1.85 0-3.55-.63-4.9-1.69L18.31 7.1A7.902 7.902 0 0 1 20 12c0 4.42-3.58 8-8 8z"/></svg></span>
+              <span class="settings-icon danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/></svg></span>
               <div class="settings-info">
                 <span class="settings-main-title" style="color:#ef4444" id="labelBlockChatUser">Block User</span>
               </div>
             </div>
             <div class="settings-row" id="btnContextClearChat">
-              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M5 13h14v-2H5v2zm-2 4h14v-2H3v2zM7 7v2h14V7H7z"/></svg></span>
+              <span class="settings-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4.5l4.5 4.5M13 6.5l4.5 4.5-6.8 6.8H6.2v-4.5z"/><path d="M4.5 20h6"/></svg></span>
               <div class="settings-info">
                 <span class="settings-main-title">Clear Chats</span>
                 <span class="settings-sub-title">Delete all messages, keep the contact</span>
               </div>
             </div>
             <div class="settings-row" id="btnContextDeleteChat">
-              <span class="settings-icon"><svg viewBox="0 0 24 24"><path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z"/></svg></span>
+              <span class="settings-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 7h15M9.5 7V4.8h5V7M6.5 7l.8 12.2h9.4L17.5 7M10 11v5M14 11v5"/></svg></span>
               <div class="settings-info">
                 <span class="settings-main-title">Delete Conversation</span>
                 <span class="settings-sub-title">Hide this chat from your directs</span>
@@ -3027,35 +2973,23 @@ body, .device-wrapper { height: var(--app-h, 100dvh); }
 
       <!-- 2. PROFILE SUBVIEW -->
       <div id="drawerProfileView">
-        <div style="text-align:center;padding:12px 0 18px">
-          <div class="chat-card-avatar" id="subviewProfileAvatar" style="width:72px;height:72px;margin:0 auto 10px;font-size:24px;border:3px solid var(--primary-blue)">U</div>
-          <button class="profile-pill-btn outline" id="btnTriggerPhotoUpload" style="font-size:12px;padding:6px 14px">Change Photo</button>
+        <div class="ep-avatar-wrap">
+          <div class="chat-card-avatar" id="subviewProfileAvatar">U</div>
+          <button class="ep-cam" id="btnTriggerPhotoUpload" aria-label="Change photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2l1.3-2h6.4l1.3 2h2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="13" r="3.4"/></svg></button>
         </div>
 
-        <div class="profile-form-group">
-          <label class="profile-form-label">Display Name</label>
-          <div style="display:flex;gap:8px">
-            <input class="profile-input" id="inputDisplayName" placeholder="Display name" maxlength="32">
-            <button class="profile-pill-btn" id="btnSaveDisplayName">Save</button>
-          </div>
+        <div class="ep-card">
+          <label class="ep-row"><span class="ep-label">Display name</span><input class="profile-input ep-input" id="inputDisplayName" autocomplete="off" placeholder="Display name" maxlength="32"></label>
+          <div class="ep-row"><span class="ep-label">Country</span><input class="profile-input ep-input" id="inputCountry" readonly placeholder="&mdash;" tabindex="-1"></div>
+          <div class="ep-row"><span class="ep-label">Email</span><input class="profile-input ep-input" id="inputEmail" readonly tabindex="-1"></div>
+          <label class="ep-row"><span class="ep-label">Username</span><input class="profile-input ep-input" id="inputUsername" autocomplete="off" placeholder="Username" maxlength="20"></label>
         </div>
+        <span class="ep-tip" id="tipUsernameCopy">Tap username to copy ID</span>
+        <div style="display:none"><button id="btnSaveDisplayName">Save</button><button id="btnSaveUsername">Save</button></div>
 
-        <div class="profile-form-group">
-          <label class="profile-form-label">Username (Unique)</label>
-          <div style="display:flex;gap:8px">
-            <input class="profile-input" id="inputUsername" placeholder="Username" maxlength="20">
-            <button class="profile-pill-btn" id="btnSaveUsername">Save</button>
-          </div>
-          <span style="font-size:11.5px;color:var(--text-muted);display:block;margin-top:4px" id="tipUsernameCopy">Tap username to copy ID</span>
-        </div>
-
-        <div class="profile-form-group">
-          <label class="profile-form-label">Email (Verified)</label>
-          <input class="profile-input" id="inputEmail" readonly style="opacity:0.75">
-        </div>
-
-        <div style="padding-top:20px">
-          <button class="profile-pill-btn danger" id="btnLogout" style="width:100%">Log Out</button>
+        <div class="ep-bottom">
+          <button class="ep-save" id="btnSaveChanges">Save Changes</button>
+          <button class="ep-delete" id="rowDeleteAccount">Delete Account</button>
         </div>
       </div>
 
@@ -3064,33 +2998,6 @@ body, .device-wrapper { height: var(--app-h, 100dvh); }
         <div id="blockedUsersContainer">
           <p style="text-align:center;color:var(--text-muted);padding:30px 10px;font-size:13.5px">No blocked accounts.</p>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ==========================================
-       USER DETAILS BOTTOM MODAL (LESLIE ALEXANDER)
-       ========================================== -->
-  <div class="user-sheet-modal" id="contactDetailsModal">
-    <div class="modal-drag-pill"></div>
-    <div class="dp-preview-avatar-wrap" style="text-align:center;margin-bottom:18px">
-      <div class="chat-card-avatar" id="modalContactAvatar" style="width:76px;height:76px;margin:0 auto 10px;font-size:26px;background:#f59e0b">LA</div>
-      <h3 style="font-size:18px;font-weight:600;color:var(--text-main)" id="modalContactName">Leslie Alexander</h3>
-      <p style="font-size:13px;color:var(--text-muted);margin-top:2px" id="modalContactRole">Web Designer</p>
-      </div>
-
-    <div class="dp-preview-meta" style="font-size:12px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;letter-spacing:0.6px">
-      Details
-    </div>
-
-    <div class="settings-card dp-preview-meta" style="margin-bottom:0">
-      <div class="settings-row">
-        <span style="font-size:14px;font-weight:600">Country</span>
-        <span style="font-size:13.5px;color:var(--text-muted)" id="modalContactCountry">&mdash;</span>
-      </div>
-      <div class="settings-row">
-        <span style="font-size:14px;font-weight:600">Device</span>
-        <span style="font-size:13.5px;color:var(--text-muted)" id="modalContactDevice">&mdash;</span>
       </div>
     </div>
   </div>
@@ -3109,6 +3016,21 @@ body, .device-wrapper { height: var(--app-h, 100dvh); }
     <div class="del-actions" style="display:flex;gap:10px;margin-top:6px">
       <button class="profile-pill-btn outline" id="btnDeleteCancel" style="flex:1;height:44px">Cancel</button>
       <button class="profile-pill-btn danger" id="btnDeleteConfirm" style="flex:1">Delete</button>
+    </div>
+  </div>
+
+  <!-- Message long-press menu -->
+  <div class="msg-menu-scrim" id="msgMenuScrim"></div>
+  <div class="msg-menu" id="msgMenu"></div>
+
+  <!-- Forward sheet -->
+  <div class="user-sheet-modal" id="forwardModal">
+    <div class="modal-drag-pill"></div>
+    <h3 style="font-size:17px;font-weight:600;text-align:center;margin-bottom:12px">Forward to</h3>
+    <div class="fwd-list" id="fwdList"></div>
+    <div style="display:flex;gap:10px">
+      <button class="profile-pill-btn outline" id="btnFwdCancel" style="flex:1;height:44px">Cancel</button>
+      <button class="profile-pill-btn" id="btnFwdSend" style="flex:1;height:44px" disabled>Send</button>
     </div>
   </div>
 
@@ -3738,6 +3660,10 @@ function updateProfileBadges() {
   if ($('inputDisplayName')) $('inputDisplayName').value = currentProfile.display || '';
   if ($('inputUsername')) $('inputUsername').value = currentProfile.username || '';
   if ($('inputEmail')) $('inputEmail').value = currentUser?.email || currentProfile.email || '';
+  if ($('inputCountry')) $('inputCountry').value = currentProfile.country || '';
+  if ($('menuProfileAvatar') && $('menuProfileAvatar').__sig !== avHtml) { $('menuProfileAvatar').__sig = avHtml; $('menuProfileAvatar').innerHTML = avHtml; }
+  if ($('menuProfileName')) $('menuProfileName').textContent = currentProfile.display || currentProfile.username || 'Your profile';
+  if ($('menuProfileUser')) $('menuProfileUser').textContent = currentProfile.username ? '@' + currentProfile.username : '';
 }
 
 /* ==========================================================================
@@ -3956,6 +3882,7 @@ function stopChatListeners() {
 }
 
 function openChatView(peerUid, profile = null) {
+  cancelComposerMode();
   stopChatListeners();
   chatSettleAt = appShell.classList.contains('in-chat') ? 0 : Date.now() + 300;
   appShell.classList.add('in-chat');
@@ -4008,6 +3935,7 @@ function openChatView(peerUid, profile = null) {
 
   if (activePeer.isYuki && currentUser) {
     const _yid = activeChatId;
+    seedYukiMessages(_yid);
     scaffoldMessages(_yid);
     const _yc = msgCache.get(_yid);
     if (_yc) renderMessages(_yid, _yc);
@@ -4144,7 +4072,7 @@ function buildMessageRow(id, msg, animate) {
   row.dataset.id = id;
   row.innerHTML = `
     <div class="msg-bubble-wrap">
-      <div class="msg-bubble">${esc(msg.text)}<span class="msg-time">${esc(timeStr)}</span></div>
+      ${msgBubbleHtml(msg, timeStr)}
     </div>`;
   row.addEventListener('animationend', () => row.classList.add('no-anim'), { once: true });
   return row;
@@ -4152,6 +4080,7 @@ function buildMessageRow(id, msg, animate) {
 
 function renderMessages(chatId, items) {
   if (activeChatId !== chatId) return;
+  { const _hid = hiddenSet(chatId); if (_hid.size) items = items.filter(i => !_hid.has(i.id)); }
   const box = $('messagesContainer');
   scaffoldMessages(chatId);
   const typing = $('typingIndicator');
@@ -4209,7 +4138,7 @@ function renderMessages(chatId, items) {
     }
 
     const timeStr = formatClock(msg.at);
-    const sig = (msg.text || '') + '|' + timeStr;
+    const sig = (msg.text || '') + '|' + timeStr + '|' + (msg.edited ? 1 : 0) + (msg.deleted ? 1 : 0) + (msg.forwarded ? 1 : 0) + (msg.replyTo ? msg.replyTo.id : '');
     let row = renderedRows.get(id);
     if (!row) {
       row = buildMessageRow(id, msg, !initial);
@@ -4219,13 +4148,11 @@ function renderMessages(chatId, items) {
       if (initial) frag.appendChild(row); else anchor.after(row);
     } else {
       if (row.__sig !== sig) {
-        row.__sig = sig;
-        const b = row.querySelector('.msg-bubble');
-        if (b) {
-          b.firstChild.textContent = msg.text || '';
-          const t = b.querySelector('.msg-time');
-          if (t) t.textContent = timeStr;
-        }
+        const nr = buildMessageRow(id, msg, false);
+        nr.__sig = sig;
+        row.replaceWith(nr);
+        renderedRows.set(id, nr);
+        row = nr;
       }
       if (!initial && anchor.nextElementSibling !== row) anchor.after(row);
     }
@@ -4315,7 +4242,7 @@ function yukiMergeLocal(chatId, items) {
   const local = yukiLocalLoad(chatId);
   if (!local.length) return items;
   const have = new Set(items.filter(i => i.msg && i.msg.by === YUKI_BOT_UID).map(i => i.msg.text));
-  const extra = local.filter(l => !have.has(l.text)).map(l => ({ id: l.id, msg: { text: l.text, by: l.by, at: l.at, seen: true } }));
+  const extra = local.filter(l => !have.has(l.text)).map(l => ({ id: l.id, msg: { ...l, seen: true } }));
   if (!extra.length) return items;
   const ms = i => { const d = toDate(i.msg.at); return d ? d.getTime() : Date.now(); };
   return items.concat(extra).sort((a, b) => ms(a) - ms(b));
@@ -4324,10 +4251,360 @@ function yukiMergeLocal(chatId, items) {
 /* ==========================================================================
    MESSAGE SENDING & BOT INTEGRATION
    ========================================================================== */
+/* ==========================================================================
+   MESSAGE ACTIONS: long-press menu (reply / forward / edit / delete)
+   ========================================================================== */
+const EDIT_WINDOW_MS = 24 * 60 * 60 * 1000;
+const ICONS = {
+  reply: '<svg viewBox="0 0 24 24"><path d="M9.5 6.5 4 12l5.5 5.5"/><path d="M4 12h9.5a6.5 6.5 0 0 1 6.5 6.5V19"/></svg>',
+  forward: '<svg viewBox="0 0 24 24"><path d="m14.5 6.5 5.5 5.5-5.5 5.5"/><path d="M20 12h-9.5A6.5 6.5 0 0 0 4 18.5V19"/></svg>',
+  edit: '<svg viewBox="0 0 24 24"><path d="M4 20h3.6L19 8.6a2.1 2.1 0 0 0 0-3L18.4 5a2.1 2.1 0 0 0-3 0L4 16.4z"/><path d="m13.5 6.9 3.6 3.6"/></svg>',
+  del: '<svg viewBox="0 0 24 24"><path d="M4.5 7h15"/><path d="M9.5 7V4.8c0-.4.3-.8.8-.8h3.4c.5 0 .8.4.8.8V7"/><path d="M6.5 7l.8 11.6c.1 1 .9 1.9 1.9 1.9h5.6c1 0 1.8-.9 1.9-1.9L17.5 7"/><path d="M10 11v6M14 11v6"/></svg>'
+};
+ICONS.delall = ICONS.del;
+const ICON_FWD = '<svg viewBox="0 0 24 24"><path d="M14 9V5l7 7-7 7v-4.1c-5 0-8.5 1.6-11 5.1 1-5 4-10 11-11z"/></svg>';
+
+let replyTarget = null;
+let editTarget = null;
+let menuMsgId = null;
+let menuOpenedAt = 0;
+let fwdMsg = null;
+const fwdSel = new Set();
+
+const snippet = t => String(t || '').replace(/\s+/g, ' ').trim().slice(0, 120);
+const canEdit = msg => {
+  if (!msg || msg.deleted || !currentUser || msg.by !== currentUser.uid) return false;
+  const d = toDate(msg.at);
+  return !!d && (Date.now() - d.getTime()) < EDIT_WINDOW_MS;
+};
+function senderLabel(by) {
+  if (currentUser && by === currentUser.uid) return 'You';
+  if (by === YUKI_BOT_UID) return 'Yuki AI';
+  return (activePeer && activePeer.display) || 'Operator';
+}
+function msgBubbleHtml(msg, timeStr) {
+  if (msg.deleted) {
+    return `<div class="msg-bubble is-deleted"><span class="msg-text">This message was deleted</span><span class="msg-time">${esc(timeStr)}</span></div>`;
+  }
+  let h = '<div class="msg-bubble">';
+  if (msg.forwarded) h += `<div class="msg-fwd">${ICON_FWD}<span>Forwarded</span></div>`;
+  if (msg.replyTo) h += `<div class="msg-quote" data-reply-id="${esc(msg.replyTo.id)}"><b>${esc(senderLabel(msg.replyTo.by))}</b><span>${esc(msg.replyTo.text)}</span></div>`;
+  h += `<span class="msg-text">${esc(msg.text)}</span><span class="msg-time">${msg.edited ? 'edited \u00b7 ' : ''}${esc(timeStr)}</span></div>`;
+  return h;
+}
+
+/* delete-for-me store (per device, per chat) */
+const hiddenKey = c => 'yukiHidden:' + c;
+function hiddenSet(c) {
+  try { return new Set(JSON.parse(localStorage.getItem(hiddenKey(c)) || '[]')); } catch (e) { return new Set(); }
+}
+function saveHidden(c, set) {
+  try { localStorage.setItem(hiddenKey(c), JSON.stringify([...set].slice(-500))); } catch (e) {}
+}
+
+/* Yuki AI: local seed messages + local patching (these are not in Firestore) */
+function seedYukiMessages(chatId) {
+  if (!currentUser) return;
+  const flag = 'yukiSeeded:' + chatId;
+  try { if (localStorage.getItem(flag)) return; } catch (e) { return; }
+  const now = Date.now();
+  const arr = yukiLocalLoad(chatId);
+  arr.push({ id: 'local_seed_1', text: 'hello', by: YUKI_BOT_UID, at: now - 120000, seen: true });
+  arr.push({ id: 'local_seed_2', text: 'how are you', by: currentUser.uid, at: now - 60000, seen: true });
+  try { localStorage.setItem(yukiLocalKey(chatId), JSON.stringify(arr)); localStorage.setItem(flag, '1'); } catch (e) {}
+}
+function yukiLocalPatch(chatId, id, patch) {
+  const arr = yukiLocalLoad(chatId);
+  const i = arr.findIndex(x => x.id === id);
+  if (i < 0) return false;
+  arr[i] = { ...arr[i], ...patch };
+  try { localStorage.setItem(yukiLocalKey(chatId), JSON.stringify(arr)); } catch (e) {}
+  return true;
+}
+function refreshYukiLocal(chatId) {
+  const base = (msgCache.get(chatId) || []).filter(i => !String(i.id).startsWith('local_'));
+  msgCache.set(chatId, yukiMergeLocal(chatId, base));
+  if (activeChatId === chatId) renderMessages(chatId, msgCache.get(chatId));
+}
+
+/* composer: reply / edit bar */
+function showComposerBar(label, text) {
+  $('replyBarLabel').textContent = label;
+  $('replyBarText').textContent = text;
+  $('replyBar').classList.add('show');
+}
+function clearComposerMode() {
+  replyTarget = null;
+  editTarget = null;
+  $('replyBar')?.classList.remove('show');
+}
+function cancelComposerMode() {
+  if (editTarget) {
+    const i = $('chatInputText');
+    if (i) { i.value = ''; i.style.height = '36px'; }
+    $('btnSendMessage')?.classList.remove('can-send');
+  }
+  clearComposerMode();
+}
+$('replyBarClose')?.addEventListener('click', cancelComposerMode);
+
+function startReply(id, msg) {
+  cancelComposerMode();
+  replyTarget = { id, by: msg.by, text: snippet(msg.text) };
+  showComposerBar('Replying to ' + senderLabel(msg.by), replyTarget.text);
+  $('chatInputText')?.focus();
+}
+function startEdit(id, msg) {
+  cancelComposerMode();
+  editTarget = { id };
+  showComposerBar('Edit message', snippet(msg.text));
+  const i = $('chatInputText');
+  i.value = msg.text || '';
+  i.style.height = '36px';
+  i.style.height = Math.min(i.scrollHeight, 120) + 'px';
+  $('btnSendMessage')?.classList.add('can-send');
+  i.focus();
+  try { i.setSelectionRange(i.value.length, i.value.length); } catch (e) {}
+}
+
+function syncLastMsg(cId, id, text) {
+  const list = msgCache.get(cId) || [];
+  const last = list[list.length - 1];
+  if (!last || last.id !== id || String(id).startsWith('local_')) return;
+  const t = String(text).slice(0, 80);
+  setDoc(doc(db, 'chats', cId), { lastMsg: t }, { merge: true }).catch(() => {});
+  const le = conversationList.find(c => c.chatId === cId);
+  if (le) { le.data = { ...le.data, lastMsg: t }; renderDirectsList(); }
+}
+
+async function submitEdit(text) {
+  const t = editTarget;
+  const cId = activeChatId;
+  if (!t || !cId) return;
+  const cur = (msgCache.get(cId) || []).find(i => i.id === t.id);
+  if (!cur || cur.msg.deleted) { cancelComposerMode(); showToast('Message is no longer available'); return; }
+  if (!canEdit(cur.msg)) { cancelComposerMode(); showToast('Edit time (24 hours) is over'); return; }
+  if (text === cur.msg.text) { cancelComposerMode(); return; }
+  cancelComposerMode();
+  try {
+    if (String(t.id).startsWith('local_')) {
+      yukiLocalPatch(cId, t.id, { text, edited: true });
+      refreshYukiLocal(cId);
+    } else {
+      await updateDoc(doc(db, 'chats', cId, 'messages', t.id), { text, edited: true, editedAt: serverTimestamp() });
+      syncLastMsg(cId, t.id, text);
+    }
+    showToast('Message edited');
+  } catch (e) {
+    console.error('Edit error:', e);
+    showToast('Could not edit message');
+  }
+}
+
+function deleteForMe(id) {
+  const cId = activeChatId;
+  if (!cId) return;
+  const set = hiddenSet(cId);
+  set.add(id);
+  saveHidden(cId, set);
+  renderMessages(cId, msgCache.get(cId) || []);
+  showToast('Deleted for you');
+}
+async function deleteForEveryone(id) {
+  const cId = activeChatId;
+  if (!cId) return;
+  const patch = { deleted: true, text: '', replyTo: null, forwarded: false, edited: false };
+  try {
+    if (String(id).startsWith('local_')) {
+      yukiLocalPatch(cId, id, patch);
+      refreshYukiLocal(cId);
+    } else {
+      await updateDoc(doc(db, 'chats', cId, 'messages', id), patch);
+      syncLastMsg(cId, id, 'This message was deleted');
+    }
+    showToast('Message deleted for everyone');
+  } catch (e) {
+    console.error('Delete error:', e);
+    showToast('Could not delete message');
+  }
+}
+
+/* forward */
+function updateFwdBtn() {
+  const b = $('btnFwdSend');
+  if (!b) return;
+  b.disabled = !fwdSel.size;
+  b.textContent = fwdSel.size ? 'Send (' + fwdSel.size + ')' : 'Send';
+}
+function openForward(msg) {
+  fwdMsg = { text: msg.text };
+  fwdSel.clear();
+  const blocked = (currentProfile && currentProfile.blockedUids) || [];
+  const list = conversationList.filter(c => !blocked.includes(c.otherUid));
+  $('fwdList').innerHTML = list.length ? list.map(c => {
+    const p = c.profile || {};
+    const name = p.display || p.username || 'Operator';
+    return `<button class="fwd-item" data-fwd="${esc(c.otherUid)}"><div class="chat-card-avatar" style="background:${getAvColor(p.username || name)}">${avatarInner(p, name)}</div><span class="fwd-name">${esc(name)}</span><span class="fwd-check"></span></button>`;
+  }).join('') : '<p style="text-align:center;color:var(--text-muted);padding:24px 10px;font-size:13.5px">No contacts yet. Start a chat first.</p>';
+  updateFwdBtn();
+  const m = $('forwardModal');
+  m.classList.remove('active');
+  void m.offsetWidth;
+  requestAnimationFrame(() => m.classList.add('active'));
+  $('masterScrim')?.classList.add('active');
+}
+function closeForward() {
+  $('forwardModal')?.classList.remove('active');
+  $('masterScrim')?.classList.remove('active');
+}
+async function sendForward() {
+  if (!fwdMsg || !fwdSel.size || !currentUser) return;
+  const text = fwdMsg.text;
+  const uids = [...fwdSel];
+  closeForward();
+  let ok = 0;
+  for (const uid of uids) {
+    const cId = getChatId(currentUser.uid, uid);
+    try {
+      await addDoc(collection(db, 'chats', cId, 'messages'), {
+        text, by: currentUser.uid, at: serverTimestamp(), seen: false, forwarded: true
+      });
+      await setDoc(doc(db, 'chats', cId), {
+        users: [currentUser.uid, uid],
+        [`participants.${currentUser.uid}`]: true,
+        [`participants.${uid}`]: true,
+        lastMsg: text.slice(0, 80),
+        lastMsgAt: serverTimestamp(),
+        lastMsgBy: currentUser.uid,
+        touchAt: serverTimestamp(),
+        unread: { [uid]: increment(1), [currentUser.uid]: 0 }
+      }, { merge: true });
+      ok++;
+    } catch (e) { console.error('Forward error:', e); }
+  }
+  showToast(ok ? 'Forwarded to ' + ok + ' chat' + (ok > 1 ? 's' : '') : 'Could not forward');
+}
+$('fwdList')?.addEventListener('click', e => {
+  const b = e.target.closest('.fwd-item');
+  if (!b) return;
+  const uid = b.dataset.fwd;
+  if (fwdSel.has(uid)) { fwdSel.delete(uid); b.classList.remove('sel'); }
+  else { fwdSel.add(uid); b.classList.add('sel'); }
+  updateFwdBtn();
+});
+$('btnFwdCancel')?.addEventListener('click', closeForward);
+$('btnFwdSend')?.addEventListener('click', sendForward);
+$('masterScrim')?.addEventListener('click', () => $('forwardModal')?.classList.remove('active'));
+
+/* popup menu */
+const msgMenuEl = $('msgMenu');
+const msgMenuScrim = $('msgMenuScrim');
+function closeMsgMenu() {
+  msgMenuEl?.classList.remove('open');
+  msgMenuScrim?.classList.remove('open');
+  msgsBox.querySelectorAll('.chat-message-row.menu-active').forEach(r => r.classList.remove('menu-active'));
+  menuMsgId = null;
+}
+function openMsgMenu(row) {
+  if (!row || !activePeer || activePeer.isDemo || !currentUser || !msgMenuEl) return;
+  const id = row.dataset.id;
+  const item = (msgCache.get(activeChatId) || []).find(i => i.id === id);
+  if (!item) return;
+  const msg = item.msg;
+  const mine = msg.by === currentUser.uid;
+  const acts = [];
+  if (!msg.deleted) {
+    acts.push(['reply', ICONS.reply, 'Reply']);
+    acts.push(['forward', ICONS.forward, 'Forward']);
+    if (mine && canEdit(msg)) acts.push(['edit', ICONS.edit, 'Edit']);
+  }
+  acts.push(['delme', ICONS.del, 'Delete for me', 1]);
+  if (mine && !msg.deleted) acts.push(['delall', ICONS.delall, 'Delete for everyone', 1]);
+
+  msgsBox.querySelectorAll('.chat-message-row.menu-active').forEach(r => r.classList.remove('menu-active'));
+  msgMenuEl.innerHTML = acts.map(a => `<button class="msg-menu-row${a[3] ? ' danger' : ''}" data-act="${a[0]}">${a[1]}<span>${a[2]}</span></button>`).join('');
+  menuMsgId = id;
+  row.classList.add('menu-active');
+
+  const shell = appShell.getBoundingClientRect();
+  const br = row.querySelector('.msg-bubble').getBoundingClientRect();
+  const W = 216, H = acts.length * 40 + 12;
+  let left = mine ? br.right - shell.left - W : br.left - shell.left;
+  left = Math.max(8, Math.min(left, shell.width - W - 8));
+  let top = br.bottom - shell.top + 6;
+  if (top + H > shell.height - 8) top = br.top - shell.top - H - 6;
+  top = Math.max(8, Math.min(top, shell.height - H - 8));
+  msgMenuEl.style.left = left + 'px';
+  msgMenuEl.style.top = top + 'px';
+  msgMenuScrim.classList.add('open');
+  void msgMenuEl.offsetWidth;
+  msgMenuEl.classList.add('open');
+  menuOpenedAt = Date.now();
+  try { if (navigator.vibrate) navigator.vibrate(10); } catch (e) {}
+}
+msgMenuEl?.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]');
+  if (!b) return;
+  const id = menuMsgId;
+  const act = b.dataset.act;
+  const item = (msgCache.get(activeChatId) || []).find(i => i.id === id);
+  closeMsgMenu();
+  if (!item) return;
+  if (act === 'reply') startReply(id, item.msg);
+  else if (act === 'forward') openForward(item.msg);
+  else if (act === 'edit') startEdit(id, item.msg);
+  else if (act === 'delme') deleteForMe(id);
+  else if (act === 'delall') deleteForEveryone(id);
+});
+msgMenuScrim?.addEventListener('click', () => { if (Date.now() - menuOpenedAt > 350) closeMsgMenu(); });
+msgMenuScrim?.addEventListener('contextmenu', e => e.preventDefault());
+msgsBox.addEventListener('scroll', () => { if (menuMsgId) closeMsgMenu(); }, { passive: true });
+
+/* long press detection (touch + mouse); right click also opens it */
+let lpTimer = 0, lpX = 0, lpY = 0, lpFiredAt = 0;
+const lpCancel = () => { clearTimeout(lpTimer); lpTimer = 0; };
+msgsBox.addEventListener('pointerdown', e => {
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
+  const bubble = e.target.closest('.msg-bubble');
+  if (!bubble) return;
+  const row = bubble.closest('.chat-message-row');
+  if (!row) return;
+  lpX = e.clientX; lpY = e.clientY;
+  lpCancel();
+  lpTimer = setTimeout(() => { lpTimer = 0; lpFiredAt = Date.now(); openMsgMenu(row); }, 420);
+});
+msgsBox.addEventListener('pointermove', e => {
+  if (lpTimer && Math.hypot(e.clientX - lpX, e.clientY - lpY) > 10) lpCancel();
+}, { passive: true });
+['pointerup', 'pointercancel', 'pointerleave'].forEach(t => msgsBox.addEventListener(t, lpCancel));
+msgsBox.addEventListener('contextmenu', e => {
+  const bubble = e.target.closest('.msg-bubble');
+  if (!bubble) return;
+  e.preventDefault();
+  lpCancel();
+  if (Date.now() - lpFiredAt > 600) { lpFiredAt = Date.now(); openMsgMenu(bubble.closest('.chat-message-row')); }
+});
+
+/* tap on a quoted reply: jump to the original message */
+msgsBox.addEventListener('click', e => {
+  const q = e.target.closest('.msg-quote');
+  if (!q || Date.now() - lpFiredAt < 600) return;
+  const tgt = [...msgsBox.querySelectorAll('.chat-message-row')].find(r => r.dataset.id === q.dataset.replyId);
+  if (!tgt) { showToast('Original message not found'); return; }
+  tgt.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  tgt.classList.remove('flash');
+  void tgt.offsetWidth;
+  tgt.classList.add('flash');
+  setTimeout(() => tgt.classList.remove('flash'), 1300);
+});
+
 async function handleSendMessage() {
   const input = $('chatInputText');
   const text = input.value.trim();
   if (!text) return;
+  if (editTarget) { await submitEdit(text); return; }
+  const replyRef = replyTarget ? { id: replyTarget.id, by: replyTarget.by, text: replyTarget.text } : null;
+  clearComposerMode();
 
   if (activePeer?.isDemo) {
     // Append demo message locally
@@ -4391,7 +4668,8 @@ async function handleSendMessage() {
       text,
       by: currentUser.uid,
       at: serverTimestamp(),
-      seen: false
+      seen: false,
+      ...(replyRef ? { replyTo: replyRef } : {})
     });
     if (peer.isYuki && activeChatId === cId && window.__msgSubOk !== cId) {
       unsubscribeMessages && unsubscribeMessages();
@@ -4563,7 +4841,7 @@ function showDrawerSubView(view) {
     prof.classList.add('active');
     blk.classList.remove('active');
     backBtn.style.display = 'grid';
-    title.textContent = 'Your Profile';
+    title.textContent = 'Edit Profile';
     updateProfileBadges();
   } else if (view === 'block') {
     main.classList.add('hidden');
@@ -4595,26 +4873,9 @@ if (!$('btnDrawerClose')?.dataset.yukiSettingsBound) {
 $('masterScrim')?.addEventListener('click', () => {
   toggleDrawer(false);
   document.documentElement.style.overflow = '';
-  $('contactDetailsModal')?.classList.remove('active', 'dp-preview');
 });
 
 $('rowOpenProfile')?.addEventListener('click', () => showDrawerSubView('profile'));
-$('btnHeaderProfile')?.addEventListener('click', e => {
-  e.preventDefault();
-  e.stopPropagation();
-  const p = currentProfile || {
-    display: currentUser?.email ? currentUser.email.split('@')[0] : 'Profile',
-    username: currentUser?.email ? currentUser.email.split('@')[0] : 'profile',
-    photoURL: ''
-  };
-  openDpPreview(p, p.display || p.username || 'Profile');
-});
-$('headerProfileAvatar')?.addEventListener('click', e => {
-  e.preventDefault();
-  e.stopPropagation();
-  const p = currentProfile || {};
-  openDpPreview(p, p.display || p.username || 'Profile');
-});
 $('rowOpenBlockList')?.addEventListener('click', () => showDrawerSubView('block'));
 
 /* Profile Saving Functions */
@@ -4904,43 +5165,6 @@ $('btnOpenYukiRoom')?.addEventListener('click', openYukiBotChat);
 setInterval(() => { if (currentUser) scheduleRenderDirects(); }, 30000);
 
 
-/* Contact details bottom sheet modal */
-function openDpPreview(profile, fallbackName = 'Profile') {
-  const modal = $('contactDetailsModal');
-  const avatar = $('modalContactAvatar');
-  if (!modal || !avatar) return;
-  const p = profile || {};
-  const name = p.display || p.username || fallbackName;
-  avatar.innerHTML = avatarInner(p, name);
-  avatar.style.background = getAvColor(name);
-  $('modalContactName').textContent = name;
-  $('modalContactRole').textContent = p.username ? '@' + p.username : 'Profile';
-
-  const countryEl = $('modalContactCountry');
-  const deviceEl = $('modalContactDevice');
-  if (p.isYuki) {
-    countryEl.textContent = '\u2014';
-    deviceEl.textContent = 'AI';
-  } else {
-    countryEl.textContent = p.country || '\u2014';
-    deviceEl.textContent = p.device || '\u2014';
-  }
-
-  /* Keep the info visible directly below the DP. */
-  modal.classList.remove('dp-preview');
-  void modal.offsetWidth;
-  modal.classList.add('active');
-  $('masterScrim')?.classList.add('active');
-}
-$('chatHeaderAvatar')?.addEventListener('click', e => {
-  e.stopPropagation();
-  if (activePeer) openDpPreview(activePeer, activePeer.display);
-});
-$('btnOpenContactDetails')?.addEventListener('click', e => {
-  e.stopPropagation();
-  if (activePeer) openDpPreview(activePeer, activePeer.display);
-});
-
 /* ==========================================================================
    COUNTRY / DEVICE INFO, CLEAR CHATS, DELETE ACCOUNT (additions)
    ========================================================================== */
@@ -4977,16 +5201,6 @@ async function syncDeviceInfo(uid) {
 const FB_AUTH_URL = 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
 const FB_FS_URL = 'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
 
-/* Contact sheet: show peer's country + device */
-$('btnOpenContactDetails')?.addEventListener('click', () => {
-  if (!activePeer) return;
-  const p = profileCache.get(activePeer.uid) || {};
-  const cEl = $('modalContactCountry'), dEl = $('modalContactDevice');
-  if (activePeer.isYuki) { cEl.textContent = '\u2014'; dEl.textContent = 'AI'; return; }
-  cEl.textContent = p.country || '\u2014';
-  dEl.textContent = p.device || '\u2014';
-});
-
 /* Clear chats (messages go, contact stays) */
 $('btnContextClearChat')?.addEventListener('click', async () => {
   if (!activePeer) return;
@@ -5013,7 +5227,14 @@ $('btnContextClearChat')?.addEventListener('click', async () => {
     const meta = { lastMsg: '' };
     if (!peer.isYuki) meta.unread = { [currentUser.uid]: 0, [peer.uid]: 0 };
     await setDoc(doc(db, 'chats', cId), meta, { merge: true });
-    if (peer.isYuki) yukiHistory = [];
+    try { localStorage.removeItem(hiddenKey(cId)); } catch(e2) {}
+    if (peer.isYuki) {
+      yukiHistory = [];
+      try { localStorage.removeItem(yukiLocalKey(cId)); localStorage.removeItem('yukiSeeded:' + cId); } catch(e2) {}
+      seedYukiMessages(cId);
+      msgCache.set(cId, yukiMergeLocal(cId, []));
+      renderMessages(cId, msgCache.get(cId));
+    }
     const _le = conversationList.find(c => c.chatId === cId);
     if (_le) {
       _le.data = { ..._le.data, lastMsg: '', unread: { ...(_le.data.unread || {}), [currentUser.uid]: 0 } };
@@ -5119,6 +5340,85 @@ $('btnContextDeleteChat')?.addEventListener('click', () => {
   setTimeout(function(){ if(!window.__chatBooted){ if(!errs.length) errs.push('no error captured - Firebase still loading (slow/blocked network?)'); show(); } },7000);
 })();
 </script>
+<style id="msgActionsCss">
+/* ===== Message actions: long-press menu, reply bar, forward sheet ===== */
+.msg-bubble { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.msg-bubble.is-deleted { font-style: italic; opacity: 0.72; }
+.chat-message-row.menu-active .msg-bubble { filter: brightness(0.9); }
+.chat-message-row.flash .msg-bubble { animation: msgFlash 1.2s ease; }
+@keyframes msgFlash { 0%, 55% { filter: brightness(0.78); } 100% { filter: none; } }
+.msg-fwd { display: flex; align-items: center; gap: 4px; font-size: 11.5px; font-style: italic; opacity: 0.82; margin-bottom: 3px; }
+.msg-fwd svg { width: 12px; height: 12px; fill: currentColor; stroke: none; }
+.msg-quote { display: block; max-width: 240px; border-left: 3px solid var(--primary-blue); background: rgba(100, 116, 139, 0.14); border-radius: 8px; padding: 5px 9px; margin-bottom: 5px; cursor: pointer; }
+.chat-message-row.is-mine .msg-quote { border-left-color: rgba(255, 255, 255, 0.85); background: rgba(255, 255, 255, 0.18); }
+.msg-quote b { display: block; font-size: 12px; font-weight: 600; }
+.msg-quote span { display: block; font-size: 12.5px; opacity: 0.85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.msg-menu-scrim { position: absolute; inset: 0; z-index: 90; display: none; }
+.msg-menu-scrim.open { display: block; }
+.msg-menu {
+  position: absolute; z-index: 91; width: 232px; padding: 6px 0;
+  background: var(--card-bg); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.16);
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transform: scale(0.9) translateY(-6px); transform-origin: top center;
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.16s ease, visibility 0s linear 0.2s;
+}
+.msg-menu.open {
+  opacity: 1; visibility: visible; pointer-events: auto; transform: none;
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.16s ease, visibility 0s;
+}
+:root[data-theme="dark"] .msg-menu { box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5); }
+.msg-menu-row { display: flex; align-items: center; gap: 16px; width: 100%; height: 46px; padding: 0 16px; text-align: left; font-size: 14.5px; color: var(--text-main); }
+.msg-menu-row:active { background: var(--card-hover); }
+.msg-menu-row svg { width: 24px; height: 24px; fill: var(--icon-fg); stroke: none; }
+.msg-menu-row.danger { color: #ef4444; }
+.msg-menu-row.danger svg { fill: #ef4444; }
+@media (hover: hover) and (pointer: fine) { .msg-menu-row:hover { background: var(--card-hover); } }
+
+.reply-bar { display: none; align-items: center; gap: 10px; margin-bottom: 8px; padding: 8px 8px 8px 12px; background: var(--card-bg); border: 1px solid var(--border-subtle); border-left: 3px solid var(--primary-blue); border-radius: 12px; }
+.reply-bar.show { display: flex; animation: drawerItemIn 0.25s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+.reply-bar-body { flex: 1; min-width: 0; }
+.reply-bar-body b { display: block; font-size: 12.5px; font-weight: 600; color: var(--primary-blue); }
+.reply-bar-body span { display: block; font-size: 13px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.reply-bar button { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; color: var(--text-muted); flex: none; }
+
+.fwd-list { max-height: 46vh; overflow-y: auto; margin: 0 -4px 12px; }
+.fwd-item { display: flex; align-items: center; gap: 12px; width: 100%; padding: 8px 6px; text-align: left; border-radius: 12px; }
+.fwd-item:active { background: var(--card-hover); }
+.fwd-item .chat-card-avatar { width: 40px; height: 40px; font-size: 14px; }
+.fwd-name { flex: 1; min-width: 0; font-size: 15px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fwd-check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border-subtle); display: grid; place-items: center; flex: none; }
+.fwd-item.sel .fwd-check { background: var(--primary-blue); border-color: var(--primary-blue); }
+.fwd-item.sel .fwd-check::after { content: ""; width: 5px; height: 10px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg) translate(-1px, -1px); }
+#btnFwdSend:disabled { opacity: 0.5; cursor: default; }
+</style>
+<style id="uiPolishCss">
+/* ===== Tap animation only on things that actually open / do something ===== */
+.msg-bubble:active, .msg-avatar:active, .brand-badge:active, #btnAttachFile:active,
+.chat-card-avatar:active, #subviewProfileAvatar:active, #modalContactAvatar:active { transform: none; }
+.user-sheet-modal .settings-row:active, #drawerBlockView .settings-row:active {
+  transform: none; background: transparent !important; opacity: 1;
+}
+
+/* ===== Message menu: tighter gaps, Telegram-style outline icons ===== */
+.msg-menu { width: 216px; padding: 6px; border-radius: 14px; }
+.msg-menu-row { height: 40px; padding: 0 10px; gap: 12px; font-size: 15px; border-radius: 8px; }
+.msg-menu-row svg { width: 22px; height: 22px; fill: none; stroke: var(--icon-fg); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.msg-menu-row.danger svg { fill: none; stroke: #ef4444; }
+
+/* ===== Blur pop animation (same feel as the search bar) on popups ===== */
+#settingsDrawer, .msg-menu {
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transform: translateY(-8px) scale(0.97); filter: blur(6px);
+  transition: opacity 0.2s ease, transform 0.3s cubic-bezier(0.4, 0, 1, 1), filter 0.25s ease, visibility 0s linear 0.3s;
+}
+#settingsDrawer.active, .msg-menu.open {
+  opacity: 1; visibility: visible; pointer-events: auto; transform: none; filter: none;
+  transition: opacity 0.32s ease 0.06s, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), filter 0.32s ease 0.04s, visibility 0s;
+}
+
+</style>
 <style id="kbFixSupport">
 /* Keyboard fix: html never scrolls; inputs are >=16px on touch devices so iOS doesn't zoom/shift the page on focus */
 html { height: 100%; overflow: hidden; overscroll-behavior: none; }
@@ -5273,24 +5573,33 @@ body { top: 0; left: 0; right: 0; }
 })();
 </script>
 <script>
-/* Search icon: show / hide the search bar */
+/* Search icon: swaps the slide bar with the search bar (and back) */
 (function(){
   var btn=document.getElementById('btnToggleSearch');
   var wrap=document.getElementById('searchBoxWrap');
+  var slot=document.getElementById('searchTabSlot');
   var input=document.getElementById('searchInput');
-  if(!btn||!wrap) return;
-  btn.addEventListener('click',function(){
-    var open=!wrap.classList.contains('search-open');
+  if(!btn||!wrap||!slot) return;
+  function isOpen(){ return wrap.classList.contains('search-open'); }
+  function setOpen(open,clear){
     wrap.classList.toggle('search-open',open);
+    slot.classList.toggle('search-mode',open);
     btn.classList.toggle('active',open);
     btn.setAttribute('aria-expanded',open?'true':'false');
     if(open){
-      setTimeout(function(){ if(input) input.focus(); },120);
+      setTimeout(function(){ if(isOpen() && input) input.focus(); },350);
     } else {
       if(input) input.blur();
       var clr=document.getElementById('searchClear');
-      if(clr && input && input.value) clr.click();
+      if(clear && clr && input && input.value) clr.click();
     }
+  }
+  btn.addEventListener('click',function(){ setOpen(!isOpen(),true); });
+  if(input) input.addEventListener('keydown',function(e){
+    if(e.key==='Enter'){ e.preventDefault(); setOpen(false,false); }
+  });
+  document.addEventListener('click',function(e){
+    if(isOpen() && e.target.closest && e.target.closest('#searchResultsView .chat-card')) setOpen(false,false);
   });
 })();
 </script>
@@ -5314,6 +5623,427 @@ body { top: 0; left: 0; right: 0; }
     if(nameChanged) nameBtn.click();
     if(userChanged) userBtn.click();
     if(nameChanged||userChanged) setTimeout(snap,0);
+  });
+})();
+</script>
+<style id="iosGlassMorphFix">
+/* ==========================================================================
+   2) TELEGRAM-STYLE OUTLINE ICONS (menu settings + chat settings)
+   ========================================================================== */
+:root #settingsDrawer #drawerMainView .settings-row .settings-icon svg {
+  width: 24px; height: 24px;
+  fill: none !important;
+  stroke: var(--icon-fg) !important;
+  stroke-width: 1.7 !important;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+:root #settingsDrawer #drawerMainView .settings-row .settings-icon { color: var(--icon-fg) !important; width: 24px; height: 24px; }
+
+/* ==========================================================================
+   3) SETTINGS SUB-VIEWS (Profile / Block List): the popup box MORPHS to its new
+   (smaller) size with the same soft blur + lift as the search bar. No side slide.
+   ========================================================================== */
+@keyframes vtIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); filter: blur(6px); }
+  to   { opacity: 1; transform: none; filter: blur(0); }
+}
+@keyframes vtFade {
+  from { opacity: 0; filter: blur(5px); }
+  to   { opacity: 1; filter: blur(0); }
+}
+/* replaces the old translateX side-scroll */
+#drawerProfileView.active, #drawerBlockView.active,
+#drawerMainView.vt-in {
+  animation: vtIn 0.46s cubic-bezier(0.22, 1, 0.36, 1) 0.08s backwards;
+}
+/* outgoing view blurs away upwards (same as the search bar) */
+#settingsDrawer .vt-out {
+  opacity: 0 !important;
+  transform: translateY(-8px) scale(0.97) !important;
+  filter: blur(6px) !important;
+  pointer-events: none;
+  transition: opacity 0.17s ease, transform 0.22s cubic-bezier(0.4, 0, 1, 1), filter 0.17s ease !important;
+}
+/* sub-view popup is narrower than before; height is animated by script */
+:root #settingsDrawer:has(#drawerMainView.hidden) { width: 276px; }
+
+#settingsDrawer.vt-run { box-sizing: border-box; }
+#settingsDrawer.vt-run > .drawer-body { overflow: hidden; }
+#settingsDrawer.vt-run:has(#drawerMainView.hidden) > .drawer-header { animation: vtFade 0.4s ease 0.12s backwards; }
+/* keep the open/close transitions of the popup and add width/height */
+#settingsDrawer.vt-morph {
+  transition: opacity 0.2s ease, transform 0.3s cubic-bezier(0.4, 0, 1, 1), filter 0.25s ease, visibility 0s linear 0.3s,
+              width 0.46s cubic-bezier(0.22, 1, 0.36, 1), height 0.46s cubic-bezier(0.22, 1, 0.36, 1);
+}
+#settingsDrawer.active.vt-morph {
+  transition: opacity 0.32s ease 0.06s, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), filter 0.32s ease 0.04s, visibility 0s,
+              width 0.46s cubic-bezier(0.22, 1, 0.36, 1), height 0.46s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* every row in the popup (incl. the last one) uses identical spacing -> icons/text line up */
+:root #settingsDrawer #drawerMainView #chatContextActions .settings-card > .settings-row { gap: 12px; padding: 0 14px; }
+
+/* ==========================================================================
+   SUBTLE TAP PRESS: every tappable thing sinks in very slightly (1.5%) on press.
+   One shared value so the whole app feels consistent; replaces the old mixed
+   scales (0.9 - 0.98) and the places where press was switched off.
+   ========================================================================== */
+:root { --press-scale: 0.985; }
+.chat-card:active, .settings-row:active, .msg-menu-row:active, .fwd-item:active, .mention-item:active,
+.brand-badge:active, .drawer-back-btn:active,
+.chat-back-btn:active, .inbox-tab:active, .composer-btn:active, .send-action-btn:active,
+.fab-new-chat:active, .profile-pill-btn:active, .auth-btn-primary:active, .auth-btn-google:active,
+.auth-toggle-link:active, .action-btn-circle:active, .ai-companion-card:active,
+.msg-avatar:active, .chat-card-avatar:active, .msg-bubble:active,
+#btnAttachFile:active, #btnOpenSettings:active, #btnChatSettingsGear:active, #btnToggleSearch:active,
+#subviewProfileAvatar:active {
+  transform: scale(var(--press-scale)) !important;
+}
+.chat-card, .settings-row, .msg-menu-row, .fwd-item, .mention-item, .brand-badge,
+.drawer-back-btn, .chat-back-btn, .inbox-tab, .composer-btn, .send-action-btn,
+.fab-new-chat, .profile-pill-btn, .auth-btn-primary, .auth-btn-google, .auth-toggle-link,
+.action-btn-circle, .ai-companion-card, .msg-avatar, .chat-card-avatar, .msg-bubble,
+#btnAttachFile, #btnOpenSettings, #btnChatSettingsGear, #btnToggleSearch {
+  transition: transform 0.12s ease-out, background-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, filter 0.2s ease, color 0.2s ease;
+}
+/* no double-shrink: the avatar inside a pressed chat card stays still */
+.chat-card:active .chat-card-avatar { transform: none !important; }
+
+
+
+/* ==========================================================================
+   SETTINGS = compact popup (same popup as chat settings), card sections like the
+   reference: smaller fonts, tighter spacing, Telegram-style outline icons.
+   ========================================================================== */
+:root #settingsDrawer {
+  top: 56px; right: 10px; left: auto; bottom: auto;
+  width: 296px; max-width: calc(100% - 20px); height: auto; max-height: calc(100% - 72px);
+  background: var(--app-bg);
+  border: 1px solid var(--border-subtle); border-radius: 16px;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.18);
+}
+:root[data-theme="dark"] #settingsDrawer { box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55); }
+:root #settingsDrawer:has(#drawerMainView.hidden) { width: 316px; }
+#settingsDrawer > .drawer-body { padding: 10px !important; }
+
+/* sub-view header (Edit Profile / Blocked): round back button + centred title */
+#settingsDrawer > .drawer-header {
+  position: relative; height: 50px; padding: 8px 12px 0; border-bottom: 0; background: transparent;
+}
+#settingsDrawer #drawerTitle {
+  position: absolute; left: 56px; right: 56px; top: 8px; bottom: 0; margin: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 600; pointer-events: none;
+}
+#settingsDrawer #btnDrawerBack {
+  width: 34px; height: 34px; border-radius: 50%; padding: 0; place-items: center;
+  background: var(--card-bg); border: 1px solid var(--border-subtle); color: var(--text-main);
+}
+#settingsDrawer #btnDrawerBack svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+#settingsDrawer:has(#drawerMainView.hidden) #btnDrawerClose,
+#btnProfileSaveAll, #settingsDrawer:has(#drawerProfileView.active) #btnProfileSaveAll { display: none !important; }
+
+/* sections = separate cards */
+:root #settingsDrawer #drawerMainView .settings-card,
+:root #settingsDrawer #drawerMainView #chatContextActions .settings-card {
+  display: block;
+  background: var(--card-bg) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: 14px !important;
+  overflow: hidden !important;
+  margin: 0 0 10px !important;
+  box-shadow: none !important;
+}
+:root #settingsDrawer #drawerMainView .settings-card > .settings-row,
+:root #settingsDrawer #drawerMainView #chatContextActions .settings-card > .settings-row:not(:last-child) {
+  height: 44px; min-height: 44px; max-height: 44px; padding: 0 12px !important; gap: 12px !important;
+}
+:root #settingsDrawer #drawerMainView .settings-card > .settings-row + .settings-row,
+:root #settingsDrawer #drawerMainView #chatContextActions .settings-card > .settings-row + .settings-row {
+  border-top: 1px solid var(--border-subtle) !important;
+}
+/* icons: Telegram-style thin outline, muted */
+:root #settingsDrawer #drawerMainView .settings-card .settings-row .settings-icon { width: 22px; height: 22px; color: var(--text-muted) !important; }
+:root #settingsDrawer #drawerMainView .settings-card .settings-row .settings-icon svg {
+  width: 22px; height: 22px; fill: none !important; stroke: var(--text-muted) !important; stroke-width: 1.6 !important;
+}
+:root #settingsDrawer #drawerMainView .settings-card .settings-row .settings-icon.danger svg { stroke: #ef4444 !important; }
+:root #settingsDrawer #drawerMainView .settings-main-title { font-size: 14px; font-weight: 400; letter-spacing: 0; }
+#settingsDrawer #drawerMainView .settings-chevron { display: block !important; flex: none; width: 16px; height: 16px; margin-left: auto; color: var(--text-muted); }
+#settingsDrawer .pm-value { font-size: 12.5px; }
+#settingsDrawer .toggle-switch { width: 40px; height: 24px; border-radius: 12px; }
+#settingsDrawer .toggle-switch:after { top: 3px; left: 3px; width: 18px; height: 18px; }
+#settingsDrawer .toggle-switch.on:after, #settingsDrawer .toggle-switch.on:active:after { transform: translateX(16px); }
+
+/* profile card: photo, name, @username */
+:root #settingsDrawer #drawerMainView .mp-profile-card > .settings-row { height: 62px; min-height: 62px; max-height: 62px; padding: 0 12px; gap: 12px; }
+#settingsDrawer .mp-avatar { width: 40px; height: 40px; flex: none; border-radius: 50%; overflow: hidden; display: grid; place-items: center; font-size: 15px; }
+#settingsDrawer .mp-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+#settingsDrawer #drawerMainView #rowOpenProfile .settings-info { display: flex; flex-direction: column; gap: 1px; }
+#settingsDrawer #drawerMainView #rowOpenProfile .settings-main-title { font-size: 14.5px; font-weight: 600; line-height: 1.25; }
+#settingsDrawer #drawerMainView #rowOpenProfile .settings-sub-title { display: block !important; font-size: 12.5px; line-height: 1.25; color: var(--text-muted); }
+
+/* Log Out */
+.mp-logout-wrap { padding: 2px 0 0; }
+#btnLogout {
+  width: 100%; height: 44px; border-radius: 999px; background: #ffffff; color: #ef4444;
+  border: 1px solid var(--border-subtle); font-size: 14px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+#btnLogout svg { width: 19px; height: 19px; }
+
+/* Edit Profile */
+#drawerProfileView.active { display: flex; flex-direction: column; }
+.ep-avatar-wrap { position: relative; width: 84px; height: 84px; margin: 2px auto 16px; }
+#drawerProfileView #subviewProfileAvatar {
+  width: 84px !important; height: 84px !important; margin: 0 !important; font-size: 28px !important;
+  border: 0 !important; box-shadow: none !important; border-radius: 50%; overflow: hidden;
+}
+#drawerProfileView #subviewProfileAvatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+#drawerProfileView #btnTriggerPhotoUpload.ep-cam {
+  position: absolute; right: -2px; bottom: -2px; width: 30px; height: 30px; padding: 0; border-radius: 50%;
+  display: grid; place-items: center; background: var(--primary-blue); color: #fff; border: 2px solid var(--app-bg);
+}
+.ep-cam svg { width: 16px; height: 16px; }
+.ep-card { background: var(--card-bg); border: 1px solid var(--border-subtle); border-radius: 14px; overflow: hidden; }
+.ep-row { display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 12px; }
+.ep-row + .ep-row { border-top: 1px solid var(--border-subtle); }
+.ep-label { flex: none; font-size: 13px; color: var(--text-muted); }
+#drawerProfileView .ep-input {
+  flex: 1; min-width: 0; height: 100%; padding: 0; border: 0 !important; background: transparent !important;
+  box-shadow: none !important; text-align: right; font-size: 14px; color: var(--text-main); opacity: 1 !important;
+}
+.ep-tip { display: block; margin: 6px 4px 0; font-size: 11.5px; color: var(--text-muted); cursor: pointer; }
+.ep-bottom { padding-top: 14px !important; display: flex; flex-direction: column; gap: 8px; }
+.ep-save, .ep-delete { width: 100%; height: 44px; border-radius: 999px; font-size: 14px; font-weight: 600; border: 0; cursor: pointer; }
+.ep-save { background: var(--primary-blue); color: #fff; }
+.ep-delete { background: var(--card-bg); color: #ef4444; border: 1px solid var(--border-subtle); }
+.ep-save:active, .ep-delete:active, #btnLogout:active { transform: scale(var(--press-scale)); }
+#drawerProfileView > .ep-avatar-wrap { padding: 0 !important; }
+#drawerProfileView > .ep-bottom { border-top: 0 !important; margin-top: 0 !important; }
+
+/* ==========================================================================
+   FIXES: (1) floating settings cards, (2) minimal Logout / Save / Delete buttons,
+   (3) no press "pop-down" on settings rows - toggles only switch on/off
+   ========================================================================== */
+
+/* 1) Main + chat settings: outer boxy container removed, every card floats on its own */
+:root #settingsDrawer:has(#drawerMainView:not(.hidden)) {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+:root #settingsDrawer:has(#drawerMainView:not(.hidden)) > .drawer-body { padding: 8px !important; }
+:root #settingsDrawer #drawerMainView .settings-card,
+:root #settingsDrawer #drawerMainView #chatContextActions .settings-card {
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.10) !important;
+}
+:root[data-theme="dark"] #settingsDrawer #drawerMainView .settings-card,
+:root[data-theme="dark"] #settingsDrawer #drawerMainView #chatContextActions .settings-card {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* 2) Buttons: smaller, quieter, minimal */
+.mp-logout-wrap { padding: 0; }
+#btnLogout {
+  height: 42px; border-radius: 14px; font-size: 14px; font-weight: 500; gap: 8px;
+  background: var(--card-bg); color: #ef4444; border: 1px solid var(--border-subtle);
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.10);
+}
+:root[data-theme="dark"] #btnLogout { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45); }
+#btnLogout svg { width: 17px; height: 17px; }
+
+.ep-bottom { padding-top: 16px !important; gap: 6px; }
+.ep-save, .ep-delete { height: 40px; border-radius: 12px; font-size: 14px; font-weight: 500; }
+.ep-delete { height: 36px; background: transparent; border: 0; color: #ef4444; font-size: 13.5px; }
+.ep-delete:active { background: rgba(239, 68, 68, 0.08); }
+
+#deleteAccountModal .del-actions .profile-pill-btn {
+  height: 40px !important; border-radius: 12px; font-size: 14px; font-weight: 500;
+}
+
+/* 3) Settings rows: no press scale / pop animation, only the toggle itself changes */
+#settingsDrawer .settings-row,
+#settingsDrawer .settings-row:active,
+:root #settingsDrawer #drawerMainView .settings-row:active,
+:root #settingsDrawer #drawerMainView #chatContextActions .settings-row:active {
+  transform: none !important;
+}
+#settingsDrawer .settings-row { transition: background-color 0.2s ease, opacity 0.2s ease !important; }
+#settingsDrawer .toggle-switch:not(.on):active:after { transform: none !important; }
+#settingsDrawer .toggle-switch.on:active:after { transform: translateX(16px) !important; }
+
+/* ==========================================================================
+   FIXES 2: profile fields, coloured + animated setting icons, box morph
+   ========================================================================== */
+
+/* Profile fields: smaller text, no browser-autofill blue box */
+#drawerProfileView .ep-label { font-size: 12.5px; }
+#drawerProfileView .ep-input { font-size: 13.5px !important; align-self: center; line-height: normal; }
+#drawerProfileView .ep-input::placeholder { font-size: 13.5px; }
+#drawerProfileView .ep-input:-webkit-autofill,
+#drawerProfileView .ep-input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--card-bg) inset !important;
+  -webkit-text-fill-color: var(--text-main) !important;
+  caret-color: var(--text-main);
+  transition: background-color 99999s ease 0s;
+}
+
+/* Sun / moon: the Dark Mode icon follows the theme (sun = light, moon = dark) */
+:root #settingsDrawer #drawerMainView .settings-card .settings-row .settings-icon.theme-ico { position: relative; }
+:root #settingsDrawer #drawerMainView .settings-card .settings-row .settings-icon.theme-ico svg {
+  position: absolute; left: 0; top: 0; width: 22px; height: 22px;
+  transition: transform 0.55s cubic-bezier(0.34, 1.45, 0.64, 1), opacity 0.3s ease, stroke 0.3s ease;
+}
+:root #settingsDrawer #drawerMainView .settings-card .settings-row .settings-icon.theme-ico .ico-sun {
+  stroke: #f5b301 !important; opacity: 1; transform: rotate(0) scale(1);
+}
+:root #settingsDrawer #drawerMainView .settings-card .settings-row .settings-icon.theme-ico .ico-moon {
+  stroke: #f1f5f9 !important; fill: rgba(241, 245, 249, 0.18) !important; opacity: 0; transform: rotate(-110deg) scale(0.3);
+}
+:root[data-theme="dark"] #settingsDrawer #drawerMainView .settings-card .settings-row .settings-icon.theme-ico .ico-sun {
+  opacity: 0; transform: rotate(110deg) scale(0.3);
+}
+:root[data-theme="dark"] #settingsDrawer #drawerMainView .settings-card .settings-row .settings-icon.theme-ico .ico-moon {
+  opacity: 1; transform: rotate(0) scale(1);
+}
+
+/* Other icons: muted when off, accent colour when on (only a few colours overall) */
+:root #settingsDrawer #drawerMainView .settings-card .settings-row .settings-icon svg { transition: stroke 0.3s ease; }
+:root #settingsDrawer #drawerMainView .settings-card .settings-row.pm-pref[data-type="toggle"]:has(.toggle-switch.on) .settings-icon svg {
+  stroke: var(--primary-blue) !important;
+}
+:root #settingsDrawer #drawerMainView .settings-card .settings-row#rowPrefReduceMotion:has(.toggle-switch.on) .settings-icon svg {
+  stroke: #f5b301 !important;
+}
+:root #settingsDrawer #drawerMainView .settings-card .settings-row#rowPrefAccent .settings-icon svg,
+:root #settingsDrawer #drawerMainView .settings-card .settings-row#rowOpenBlockList .settings-icon svg {
+  stroke: var(--primary-blue) !important;
+}
+:root #settingsDrawer #drawerMainView .settings-card .settings-row#rowOpenBlockList .settings-icon svg,
+:root #settingsDrawer #drawerMainView .settings-card .settings-row#btnContextBlock .settings-icon svg {
+  stroke: #ef4444 !important;
+}
+
+/* Icon animation when a setting is switched (class added by script, removed on end) */
+@keyframes icoPop   { 0% { transform: scale(1); } 40% { transform: scale(0.55) rotate(-12deg); } 70% { transform: scale(1.25) rotate(6deg); } 100% { transform: scale(1); } }
+@keyframes icoShake { 0%,100% { transform: translateX(0); } 15% { transform: translateX(-3px) rotate(-8deg); } 35% { transform: translateX(3px) rotate(8deg); } 55% { transform: translateX(-2px) rotate(-5deg); } 75% { transform: translateX(2px) rotate(4deg); } }
+@keyframes icoFlash { 0% { transform: scale(1); } 30% { transform: scale(1.4) rotate(-10deg); } 60% { transform: scale(0.85); } 100% { transform: scale(1); } }
+@keyframes icoSpin  { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+@keyframes icoFlip  { 0% { transform: rotate(0) scale(1); } 50% { transform: rotate(90deg) scale(0.8); } 100% { transform: rotate(180deg) scale(1); } }
+#settingsDrawer .settings-icon.ico-anim { animation: icoPop 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+#settingsDrawer .settings-row[data-pref="hp"] .settings-icon.ico-anim { animation: icoShake 0.5s ease; }
+#settingsDrawer .settings-row[data-pref="rm"] .settings-icon.ico-anim { animation: icoFlash 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+#settingsDrawer .settings-row[data-pref="ts"] .settings-icon.ico-anim,
+#settingsDrawer .settings-row[data-pref="accent"] .settings-icon.ico-anim,
+#settingsDrawer .settings-row[data-pref="reset"] .settings-icon.ico-anim { animation: icoSpin 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+#settingsDrawer .settings-row[data-pref="hc"] .settings-icon.ico-anim { animation: icoFlip 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+#settingsDrawer .settings-icon.theme-ico.ico-anim { animation: none; }
+
+/* Box morph (Profile / Block List / Back): the popup box grows from the floating cards,
+   so its background, border and shadow fade together with the size change */
+:root #settingsDrawer:has(#drawerMainView:not(.hidden)) { border: 1px solid transparent; }
+:root #settingsDrawer.active {
+  transition: opacity 0.32s ease 0.06s, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), filter 0.32s ease 0.04s, visibility 0s,
+              background-color 0.45s ease, border-color 0.45s ease, box-shadow 0.45s ease;
+}
+:root #settingsDrawer.active.vt-morph {
+  transition: opacity 0.32s ease 0.06s, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), filter 0.32s ease 0.04s, visibility 0s,
+              width 0.46s cubic-bezier(0.22, 1, 0.36, 1), height 0.46s cubic-bezier(0.22, 1, 0.36, 1),
+              background-color 0.45s ease, border-color 0.45s ease, box-shadow 0.45s ease;
+}
+</style>
+<script id="iosGlassMorphFixJs">
+/* Settings popup: Profile / Block List / Back = morph the box (size + blur), no side scroll.
+   Wraps the existing click handlers: it plays the exit blur, then re-fires the original click,
+   measures the new size and animates the box to it. Nothing else is touched. */
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var drawer = $('settingsDrawer'), main = $('drawerMainView'), prof = $('drawerProfileView'), blk = $('drawerBlockView');
+  if (!drawer || !main || !prof || !blk) return;
+  var OUT_MS = 170, MORPH_MS = 480, bypass = false, busy = false, t1 = 0, t2 = 0;
+
+  function reduced() {
+    return document.documentElement.dataset.pRm === '1' ||
+      (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }
+  function visibleView() {
+    if (!main.classList.contains('hidden')) return main;
+    return prof.classList.contains('active') ? prof : blk;
+  }
+  function clean() {
+    clearTimeout(t1); clearTimeout(t2);
+    drawer.classList.remove('vt-run', 'vt-morph');
+    drawer.style.width = ''; drawer.style.height = '';
+    [main, prof, blk].forEach(function (v) { v.classList.remove('vt-out', 'vt-in'); });
+    busy = false;
+  }
+  function run(trigger) {
+    busy = true;
+    var out = visibleView();
+    var fromW = drawer.offsetWidth, fromH = drawer.offsetHeight;
+    drawer.classList.add('vt-run');
+    out.classList.add('vt-out');
+    t1 = setTimeout(function () {
+      if (!drawer.classList.contains('active')) { clean(); return; }
+      drawer.classList.remove('vt-morph');
+      drawer.style.width = fromW + 'px'; drawer.style.height = fromH + 'px';
+      bypass = true;
+      try { trigger.click(); } finally { bypass = false; }
+      out.classList.remove('vt-out');
+      var inc = visibleView();
+      if (inc === main) inc.classList.add('vt-in');
+      /* natural size of the new view */
+      drawer.style.width = ''; drawer.style.height = '';
+      var toW = drawer.offsetWidth, toH = drawer.offsetHeight;
+      drawer.style.width = fromW + 'px'; drawer.style.height = fromH + 'px';
+      void drawer.offsetHeight;
+      drawer.classList.add('vt-morph');
+      drawer.style.width = toW + 'px'; drawer.style.height = toH + 'px';
+      t2 = setTimeout(clean, MORPH_MS + 80);
+    }, OUT_MS);
+  }
+
+  document.addEventListener('click', function (e) {
+    if (bypass) return;
+    var t = e.target && e.target.closest && e.target.closest('#rowOpenProfile,#rowOpenBlockList,#btnDrawerBack');
+    if (!t) return;
+    if (!drawer.classList.contains('active') || reduced()) return;   /* plain behaviour */
+    e.stopImmediatePropagation(); e.preventDefault();
+    if (!busy) run(t);
+  }, true);
+
+  /* popup closed while animating: reset immediately */
+  new MutationObserver(function () {
+    if (busy && !drawer.classList.contains('active')) clean();
+  }).observe(drawer, { attributes: true, attributeFilter: ['class'] });
+})();
+
+
+</script>
+<script>
+/* Save Changes button (bottom of Edit Profile) = the existing save-all logic */
+document.getElementById('btnSaveChanges')?.addEventListener('click', function(){ document.getElementById('btnProfileSaveAll')?.click(); });
+</script>
+<script>
+/* Settings icon animation: runs when a setting row is tapped (display only) */
+(function () {
+  var d = document.getElementById('settingsDrawer');
+  if (!d) return;
+  d.addEventListener('click', function (e) {
+    var row = e.target.closest && e.target.closest('.settings-row');
+    if (!row) return;
+    var isPref = row.classList.contains('pm-pref');
+    var isTheme = row.id === 'rowToggleTheme' || row.id === 'btnContextTheme';
+    if (!isPref && !isTheme) return;
+    var ic = row.querySelector('.settings-icon');
+    if (!ic) return;
+    ic.classList.remove('ico-anim');
+    void ic.offsetWidth;
+    ic.classList.add('ico-anim');
+    setTimeout(function () { ic.classList.remove('ico-anim'); }, 700);
   });
 })();
 </script>
